@@ -168,7 +168,7 @@ Fill out the app resgistration details
 
 Select 'ADD OR REMOVE SCOPES' and set the `userinfo.email` scope
 
-![scopes](images/scopes.png]
+![scopes](images/scopes.png)
 
 Select "SAVE AND CONTINUE"
 
