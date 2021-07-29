@@ -66,4 +66,5 @@ If you have not guessed by name, this is based off, and comes with credit to [Ke
 * [Install Fuclio](docs/06-fulcio.md)
 * [Install CTL](docs/07-certifcate-transparency.md)
 * [Configure Container Registry](docs/08-configure-registry.md)
+* [Install cosign](docs/09-cosign.md)
 * [Sign a container image](docs/10-sign-container.md)

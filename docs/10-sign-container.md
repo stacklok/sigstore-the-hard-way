@@ -63,11 +63,9 @@ If you got this far well done for completing the tutorial!
 
 ## What Next
 
-If you're not already part of the sigstore community, come and join us on our [slack channel](https://sigstore.slack.com)
+If you're not already part of the sigstore community, come and join us on our slack channel; [Invite link](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ)
 and tell us abour your ideas!
 
 If you want to improve this guide, please make an issue or better still a pull request!
 
 Don't forget to delete your instances and not take on unwanted costs!
-
-[Invite link](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ)
