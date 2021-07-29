@@ -55,9 +55,19 @@ Certificate subject:  [lhinds@redhat.com]
 {"critical":{"identity":{"docker-reference":"ghcr.io/lukehinds/sigstore-thw"},"image":{"docker-manifest-digest":"sha256:568999d4aedd444465c442617666359ddcd4dc117b22375983d2576c3847c9ba"},"type":"cosign container image signature"},"optional":null}
 ```
 
-You're done! Well done for completing the tutorial!
+## Congrats
+
+If you got this far well done for completing the tutorial!
+
+![glass](images/glass.gif)
 
 ## What Next
 
-If you're not already part of the sigstore community, come and join us on our [slack channel](https://sigstore.slack.com)!
+If you're not already part of the sigstore community, come and join us on our [slack channel](https://sigstore.slack.com)
+and tell us abour your ideas!
+
+If you want to improve this guide, please make an issue or better still a pull request!
+
+Don't forget to delete your instances and not take on unwanted costs!
+
 [Invite link](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ)

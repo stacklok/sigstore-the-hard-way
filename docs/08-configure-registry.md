@@ -18,18 +18,20 @@ CMD ["echo", "Hello Sigstore!"]
 docker build -t sigstore-thw:latest .
 ```
 
-## gchr PAT
+## gchr PAT code
 
 Create a PAT (Personal Access Token) for your account, by following
 [the relevant GitHub page](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 
-Once you have your PAT code, login to ghcr
+Once you have your PAT code, login to ghcr:
 
 ```
 export CR_PAT=YOUR_TOKEN ; echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 ```
 
-Now we can tag and push our image
+## Tag and push an imag
+
+Now we can tag and push our image:
 
 ```
 docker tag SOURCE_IMAGE_NAME:VERSION ghcr.io/TARGET_OWNER/TARGET_IMAGE_NAME:VERSION
@@ -51,4 +53,4 @@ cb381a32b229: Pushed
 latest: digest: sha256:568999d4aedd444465c442617666359ddcd4dc117b22375983d2576c3847c9ba size: 528
 ```
 
-Next: [Cosign](cosign.md)
+Next: [Install cosign](09-cosign.md)
