@@ -126,7 +126,7 @@ Loading table data..
 ## Install trillian components
 
 ```
-go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-
+go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
 ```
 
 ```
