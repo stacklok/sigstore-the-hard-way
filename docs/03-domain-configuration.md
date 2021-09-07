@@ -19,6 +19,11 @@ gcloud compute instances describe sigstore-rekor \
 
 You now want to make an "A Record" to a subdomain or "rekor" and to your external IP from the above command
 
+To create resource records on Google, 
+1. Go to [Google Domains](https://domains.google.com/)
+2. Click on your domain from the homepage
+3. DNS > Manage Custom Records
+
 |Type|Host| Value|
 |---|---|---|
 | A Record|rekor|x.x.x.x|
