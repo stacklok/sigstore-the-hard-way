@@ -23,7 +23,7 @@ You now want to make an "A Record" to a subdomain or "rekor" and to your externa
 |---|---|---|
 | A Record|rekor|x.x.x.x|
 
-### fuclio.example.com
+### fulcio.example.com
 
 Now repeat the same for fulcio, and dex
 

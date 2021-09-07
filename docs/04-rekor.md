@@ -203,8 +203,9 @@ trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 
 Start rekor..
 
 ```
-rekor-server serve --rekor_server.address=0.0.0.0 --rekor_server.port=3000 --trillian_log_server.port=8091
+rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 ```
+Note: Rekor runs on port 3000 by default
 
 ## Let's encrypt (TLS) & HA Proxy config
 

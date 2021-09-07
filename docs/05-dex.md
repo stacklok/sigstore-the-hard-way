@@ -50,7 +50,7 @@ Set up some specifics
 
 ```
 DOMAIN=oauth2.yourdomain.com
-IP=10.240.0.10
+IP=10.240.0.12
 ```
 
 ```
@@ -97,12 +97,13 @@ sudo certbot certonly --standalone --preferred-challenges http \
 ```
 sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
      "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" \
-     > "/etc/ssl/private/${DOMAIN}.pem"
+     > "./${DOMAIN}.pem"
 
 ```
 
+Move the PEM chain into place
 ```
-sudo mv ./${DOMAIN}.pem /etc/ssl/private/${DOMAIN}.pem
+sudo cp ./${DOMAIN}.pem /etc/ssl/private/${DOMAIN}.pem
 ```
 
 ### Start HAProxy
@@ -159,6 +160,8 @@ sudo mv bin/dex /usr/local/bin/
 Select 'Internal'
 
 ![consent](images/oauth-consent.png)
+
+NOTE: If you're not a Google Workspace user, the 'Internal' option will not be available. You can only make your app available to external (general audience) users only. In such a case, the 'External' User Type works fine as well. 
 
 Fill out the app resgistration details
 
