@@ -71,11 +71,11 @@ EOF
 ```
 
 ```
-export SOFTHSM2_CONF=`pwd`/config/softhsm2.cfg`
+export SOFTHSM2_CONF=`pwd`/config/softhsm2.cfg
 ```
 
 ```
-echo "export SOFTHSM2_CONF=`pwd`/config/softhsm2.cfg" >> ~/.bash_profile`
+echo "export SOFTHSM2_CONF=`pwd`/config/softhsm2.cfg" >> ~/.bash_profile
 ```
 
 ```
@@ -183,6 +183,8 @@ Navigate to the [Certificate Authority Service API](https://console.cloud.google
 
 ![Enable CA](images/enable_gcp_ca.png)
 
+On the Google Cloud Console page, go to Security > Certificate Authority Service > Create CA
+
 1. Set the CA type (DevOps)
 
 ![CA Type](images/ca_type.png)
@@ -270,7 +272,7 @@ Let's now run certbot to obtain our TLS certs.
 ```
 sudo certbot certonly --standalone --preferred-challenges http \
       --http-01-address 10.240.0.11 --http-01-port 80 -d ${DOMAIN} \
-      --non-interactive --agree-tos --email youremail@domain.com
+      --non-interactive --agree-tos --email ${EMAIL}
 ```
 
 Build a cert chain
@@ -352,7 +354,7 @@ sudo mkdir /etc/fulcio-config/
 ```
 
 ```
-sudo mv config.json /etc/fulcio-config/`
+sudo mv config.json /etc/fulcio-config/
 ````
 
 # Start FulcioCA

@@ -157,15 +157,16 @@ go get -u github.com/google/certificate-transparency-go/trillian/ctfe/ct_server
 
 ## Create a private key
 
+Note: The private key needs a passphrase amd remember it as you will need it for `your_passphrase`
 ```
 openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
 openssl ec -in unenc.key -out privkey.pem -des
-rm unenv.key
+rm unenc.key
 ```
 
-Remember your passphrase, this will be needed for `your_passphrase`
 ## Create a Tree ID
 
+Note: `trillian_log_server` needs to be running for this command to execute
 ```
 LOG_ID=`createtree --admin_server localhost:8091`
 ```

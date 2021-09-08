@@ -12,6 +12,7 @@ you already have locally
 cat > ~/Dockerfile <<EOF
 FROM alpine
 CMD ["echo", "Hello Sigstore!"]
+EOF
 ```
 
 ```
