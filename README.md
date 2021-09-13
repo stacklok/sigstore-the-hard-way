@@ -12,11 +12,11 @@ means no Dockerfiles or deployment framework playbooks. Everything is set up man
 With 'Sigstore the Hard Way' we will install, configure and run the following components to provide a 'keyless' signing
 infrastructure.
 
-1. Fulcio WebPKI
-2. Rekor, signature transparency log and timestamping authority
-3. Certificate Transparency Log
-4. Dex OpenID Connect provider
-5. Cosign
+1. [Fulcio](https://github.com/sigstore/fulcio) WebPKI
+2. [Rekor](https://github.com/sigstore/rekor), signature transparency log and timestamping authority
+3. [Certificate Transparency Log](https://github.com/google/certificate-transparency-go/tree/master/trillian)
+4. [Dex](https://github.com/dexidp/dex), OpenID Connect provider
+5. [Cosign](https://github.com/sigstore/cosign), container (and more) signing and verifying tool
 
 ## Requirements
 
@@ -29,7 +29,7 @@ all the instances, networks etc.
 You can of course use local machines if you have them, or any other provider such as AWS, Azure (pull requests welcomed!)
 
 The only other requirement is a domain name, where you have the ability to create some subdomains. We need a domain
-for an OpenID Connect session (providers don't always like redirect_urls to IP addresses). It's up to you who you use, any provider will do. If you already have a domain, it makes sense to use that. We won't be messing with the root domain if you're already running something there, just creating subdomains (e.g. rekor.example.com, fuclio.example.com)
+for an OpenID Connect session (providers don't always like redirect_urls to IP addresses). It's up to you who you use, any provider will do. If you already have a domain, it makes sense to use that. We won't be messing with the root domain if you're already running something there, just creating subdomains (e.g. rekor.example.com, fulcio.example.com)
 
 
 
@@ -37,11 +37,11 @@ for an OpenID Connect session (providers don't always like redirect_urls to IP a
 
 For the Certificate Authority we will have two options to choose from:
 
-* SoftHSM
+* [SoftHSM](http://www.softhsm.org/)
 * Google's Certificate Transparency Service
 
 Google's is a paid service, but easy to set up. SoftHSM is completely free, but requires a little more setup (but nothing
-to challenging)
+too challenging)
 
 Last of all we will sign a container image using cosign.
 
@@ -51,7 +51,7 @@ Last of all we will sign a container image using cosign.
 
 ### Copyright
 
-If you have not guessed by name, this is based off, and comes with credit to [Kelsey Hightowers, Kubernetes the Hardway](https://github.com/kelseyhightower/kubernetes-the-hard-way)
+If you have not guessed by name, this is based off, and comes with credit to [Kelsey Hightower's Kubernetes the Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way)
 
 
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img ealt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
