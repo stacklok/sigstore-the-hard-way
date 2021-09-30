@@ -44,7 +44,7 @@ gcloud compute instances describe sigstore-fulcio \
 ### oauth2.example.com
 
 ```
-gcloud compute instances describe sigstore-dex \
+gcloud compute instances describe sigstore-oauth2 \
 --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
 
