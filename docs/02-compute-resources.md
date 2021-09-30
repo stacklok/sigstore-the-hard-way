@@ -35,11 +35,11 @@ gcloud compute firewall-rules create sigstore-the-hard-way-allow-external \
 Verify the rules were created
 
 ```
-gcloud compute firewall-rules list --filter="network:sigstore-the-hardway-proj"
+gcloud compute firewall-rules list --filter="network:sigstore-the-hard-way-proj"
 ```
 
 ```
-gcloud compute firewall-rules list --filter="network:sigstore-the-hardway-proj"
+gcloud compute firewall-rules list --filter="network:sigstore-the-hard-way-proj"
 
 NAME                                  NETWORK                DIRECTION  PRIORITY  ALLOW                         DENY  DISABLED
 default-allow-icmp                    default                INGRESS    65534     icmp                                False
@@ -59,13 +59,13 @@ gcloud compute addresses create sigstore-the-hard-way-proj \
 Verify the external IP range
 
 ```
-gcloud compute addresses list --filter="name=('sigstore-the-hardway-proj')"
+gcloud compute addresses list --filter="name=('sigstore-the-hard-way-proj')"
 ```
 
 e.g.
 
 ```
-gcloud compute addresses list --filter="name=('sigstore-the-hardway-proj')"
+gcloud compute addresses list --filter="name=('sigstore-the-hard-way-proj')"
 
 NAME                        ADDRESS/RANGE  TYPE      PURPOSE  NETWORK  REGION        SUBNET  STATUS
 sigstore-the-hard-way-proj  34.79.121.255  EXTERNAL                    europe-west1          RESERVED
