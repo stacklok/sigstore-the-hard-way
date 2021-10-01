@@ -2,17 +2,19 @@
 
 We are now ready to sign our container using our own sigstore infrastructure
 
-
-```
-COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer "https://oauth2.example.com/auth" -fulcio-server "https://fulcio.example.com" -rekor-server "https://rekor.example.com"  ghcr.io/<github_user>/sigstore-thw:latest
+```bash
+COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer "https://oauth2.example.com/auth" -fulcio-url "https://fulcio.example.com" -rekor-url "https://rekor.example.com" ghcr.io/<github_user>/sigstore-thw:latest
 ```
 
 > :notebook: `COSIGN_EXPERIMENTAL` does as it says, you're trying out an experimental feature here.
 
+> 📝 If you receive an `UNAUTHORIZED: authentication required` error. You need
+  to reauthenticate with your PAT in GitHub Container Registry again, refer to [Configure registry](08-configure-registry.md)
+
 An example run:
 
-```
-COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+```bash
+$ COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 Generating ephemeral keys...
 Retrieving signed certificate...
 Your browser will now be opened to:
@@ -26,24 +28,24 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 
 We will now verify the signing, but before we do we need to tell cosign about our fulcio root.
 
-Grab your `fulcio-root.pem` cerficate you generated on the fulcio server (and also copied to the certificate transparency server
+Grab your `fulcio-root.pem` cerficate you generated on the fulcio server (and also copied to the certificate transparency server)
 
 Set the following environment variable:
 
-```
-export SIGSTORE_ROOT_FILE=~/fulcio-root.pem
+```bash
+$ export SIGSTORE_ROOT_FILE="$HOME/fulcio-root.pem"
 ```
 
 We can now verify
 
-```
-COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
+```bash
+$ COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
 ```
 
 An example:
 
-```
-COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+```bash
+$ COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 
 Verification for ghcr.io/lukehinds/sigstore-thw:latest --
 The following checks were performed on each of these signatures:
