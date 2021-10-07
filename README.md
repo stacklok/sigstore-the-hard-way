@@ -63,7 +63,7 @@ If you have not guessed by name, this is based off, and comes with credit to [Ke
 * [Domain Configuration](docs/03-domain-configuration.md)
 * [Install Rekor](docs/04-rekor.md)
 * [Install Dex](docs/05-dex.md)
-* [Install Fuclio](docs/06-fulcio.md)
+* [Install Fulcio](docs/06-fulcio.md)
 * [Install CTL](docs/07-certifcate-transparency.md)
 * [Configure Container Registry](docs/08-configure-registry.md)
 * [Install cosign](docs/09-cosign.md)

@@ -12,17 +12,25 @@ Now that are instances are running, lets grab the external IP's and set up domai
 
 Grab your external / public IP
 
-```
-gcloud compute instances describe sigstore-rekor \
---format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+```bash
+$ gcloud compute instances describe sigstore-rekor \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
 
 You now want to make an "A Record" to a subdomain or "rekor" and to your external IP from the above command
 
-To create resource records on Google, 
+To create resource records on Google,
 1. Go to [Google Domains](https://domains.google.com/)
 2. Click on your domain from the homepage
 3. DNS > Manage Custom Records
+
+If you're using GCP as the DNS provider this can be done as follows
+
+```bash
+$ gcloud dns record-sets create rekor.example.com. \
+  --rrdatas=$(gcloud compute instances describe sigstore-rekor --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
+  --type=A --ttl=60 --zone=example-com
+```
 
 |Type|Host| Value|
 |---|---|---|
@@ -32,9 +40,17 @@ To create resource records on Google,
 
 Now repeat the same for fulcio, and dex
 
+```bash
+$ gcloud compute instances describe sigstore-fulcio \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
-gcloud compute instances describe sigstore-fulcio \
---format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+
+If you're using GCP as the DNS provider this can be done as follows
+
+```bash
+$ gcloud dns record-sets create fulcio.example.com. \
+  --rrdatas=$(gcloud compute instances describe sigstore-fulcio --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
+  --type=A --ttl=60 --zone=example-com
 ```
 
 |Type|Host| Value|
@@ -43,14 +59,22 @@ gcloud compute instances describe sigstore-fulcio \
 
 ### oauth2.example.com
 
+```bash
+$ gcloud compute instances describe sigstore-oauth2 \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
-gcloud compute instances describe sigstore-oauth2 \
---format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+
+If you're using GCP as the DNS provider this can be done as follows
+
+```bash
+$ gcloud dns record-sets create oauth2.example.com. \
+  --rrdatas=$(gcloud compute instances describe sigstore-oauth2 --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
+  --type=A --ttl=60 --zone=example-com
 ```
 
 |Type|Host| Value|
 |---|---|---|
-| A Record|dex|x.x.x.x|
+| A Record|oauth2|x.x.x.x|
 
 > 📝 We do not need a domain for the certificate transparency log. This only
  communicate over a private network to Fulcio.

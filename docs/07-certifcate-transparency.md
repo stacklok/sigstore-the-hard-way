@@ -1,45 +1,76 @@
-# certificate transparency log
+# Certificate transparency log
 
-We will now install the certificate transparency log (CTL).
+We will now install the Certificate transparency log (CTL).
 
 CTL requires running instances of trillian's log server and signer
 
 Let's start by logging in
 
-```
-gcloud compute ssh sigstore-ctl
+```bash
+$ gcloud compute ssh sigstore-ctl
 ```
 
 ## Dependencies
 
-```
-sudo apt-get update -y
-```
-
-```
-sudo apt-get install mariadb-server git haproxy wget certbot -y
+```bash
+$ sudo apt-get update -y
 ```
 
-## Install Go 1.16
+If you want to save up some time, remove man-db first
 
-```
-curl -O https://storage.googleapis.com/golang/getgo/installer_linux
-```
-
-```
-chmod +x installer_linux
+```bash
+$ sudo apt-get remove -y --purge man-db
 ```
 
-```
-./installer_linux
+```bash
+$ sudo apt-get install mariadb-server git wget -y
 ```
 
-## Database
+### Install latest golang compiler
+
+Download and run the golang installer (system package is not yet 1.16)
+
+```bash
+$ curl -O https://storage.googleapis.com/golang/getgo/installer_linux
+```
+
+```bash
+$ chmod +x installer_linux
+```
+
+```bash
+$ ./installer_linux
+```
+
+e.g.
+
+```
+Welcome to the Go installer!
+Downloading Go version go1.17.1 to /home/luke/.go
+This may take a bit of time...
+Downloaded!
+Setting up GOPATH
+GOPATH has been set up!
+
+One more thing! Run `source /home/$USER/.bash_profile` to persist the
+new environment variables to your current session, or open a
+new shell prompt.
+```
+
+As suggested run
+
+```bash
+$ source /home/$USER/.bash_profile
+$ go version
+go version go1.17.1 linux/amd64
+```
+
+### Database
 
 Trillian requires a databbase, let's first run `mysql_secure_installation`
 
-```
-sudo mysql_secure_installation
+```bash
+$ sudo mysql_secure_installation
 
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
@@ -99,23 +130,23 @@ Thanks for using MariaDB!
 
 We can now import the database as we used for rekor
 
-```
-wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/createdb.sh
-```
-
-```
-wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/storage.sql
+```bash
+$ wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/createdb.sh
 ```
 
-```
-chmod +x createdb.sh
-```
-
-```
-sudo ./createdb.sh
+```bash
+$ wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/storage.sql
 ```
 
-E.g 
+```bash
+$ chmod +x createdb.sh
+```
+
+```bash
+$ sudo ./createdb.sh
+```
+
+E.g.
 
 ```
 sudo ./createdb.sh
@@ -123,66 +154,147 @@ Creating test database and test user account
 Loading table data..
 ```
 
-## Install trillian components
+### Install trillian components
 
-```
-go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
-```
-
-```
-go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
+```bash
+$ go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
 ```
 
-```
-go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
+```bash
+$ sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
-## Run trillian
+```bash
+$ go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
+```
+
+```bash
+$ sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+```
+
+```bash
+$ go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
+```
+
+```bash
+$ sudo mv ~/go/bin/createtree /usr/local/bin/
+```
+
+### Run trillian
 
 The following is best run in two terminals which are then left open (this helps for debugging)
 
-```
-trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
-```
-
-```
-trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
+```bash
+$ trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
 ```
 
-## Install CTFE server
-
-```
-go get -u github.com/google/certificate-transparency-go/trillian/ctfe/ct_server
+```bash
+$ trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
 ```
 
-## Create a private key
+Alternatively, create bare minimal systemd services
+
+```bash
+$ cat /etc/systemd/system/trillian_log_server.service
+[Unit]
+Description=trillian_log_server
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+ExecStart=/usr/local/bin/trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+$ cat /etc/systemd/system/trillian_log_signer.service
+[Unit]
+Description=trillian_log_signer
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+ExecStart=/usr/local/bin/trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable systemd services
+
+```bash
+$ sudo systemctl daemon-reload
+```
+
+```bash
+$ sudo systemctl enable trillian_log_server.service
+Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
+$ sudo systemctl start trillian_log_server.service
+$ sudo systemctl status trillian_log_server.service
+● trillian_log_server.service - trillian_log_server
+   Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
+```
+
+```bash
+$ sudo systemctl enable trillian_log_signer.service
+Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
+$ sudo systemctl start trillian_log_signer.service
+$ sudo systemctl status trillian_log_signer.service
+● trillian_log_signer.service - trillian_log_signer
+   Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
+```
+
+### Install CTFE server
+
+```bash
+$ go get -u github.com/google/certificate-transparency-go/trillian/ctfe/ct_server
+```
+
+```bash
+$ sudo mv ~/go/bin/ct_server /usr/local/bin/
+```
+
+### Create a private key
 
 Note: The private key needs a passphrase amd remember it as you will need it for `your_passphrase`
-```
-openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-openssl ec -in unenc.key -out privkey.pem -des
-rm unenc.key
+
+```bash
+$ openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
+$ openssl ec -in unenc.key -out privkey.pem -des
+$ rm unenc.key
 ```
 
-## Create a Tree ID
+### Create a Tree ID
 
 Note: `trillian_log_server` needs to be running for this command to execute
-```
-LOG_ID=`createtree --admin_server localhost:8091`
-```
-
-## Set up the config file
-
 
 ```
-cat > ct.cfg <<EOF
+LOG_ID="$(createtree --admin_server localhost:8091)"
+```
+
+### Set up the config file
+
+```bash
+$ cat > ct.cfg <<EOF
 config {
   log_id: ${LOG_ID}
   prefix: "sigstore"
-  roots_pem_file: "${HOME}/fulcio-root.pem"
+  roots_pem_file: "/etc/fulcio/fulcio-root.pem"
   private_key: {
     [type.googleapis.com/keyspb.PEMKeyFile] {
-       path: "${HOME}/privkey.pem"
+       path: "/etc/fulcio/privkey.pem"
        password: "<your_passphrase>"
     }
   }
@@ -193,16 +305,49 @@ EOF
 Afterwards, open the file again and change `<your_passphrase>` to the one you used
 when generating the private key.
 
+Note: `fulcio-root.pem` is the root ID certificate, we created in [06-fulcio](06-fulcio.md).
 
-`/root/fuclio-root.pem` is the root ID, we created in [04-fulcio](04-fulcio.md).
-
-## Start the CT log
-
+```bash
+$ sudo mkdir -p /etc/fulcio
+$ sudo mv ct.cfg /etc/fulcio/
+$ sudo mv fulcio-root.pem /etc/fulcio/
+$ sudo mv privkey.pem /etc/fulcio/
 ```
-ct_server -logtostderr -log_config ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
+
+### Start the CT log
+
+```bash
+$ ct_server -logtostderr -log_config /etc/fulcio/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
 ```
 
 > 📝 The `-http_endpoint` flag uses the internal private IP. We don't need this facing externally
   (for this tutorial at least)
+
+You may create a bare minimal systemd service
+
+```bash
+$ cat /etc/systemd/system/ct_server.service
+[Unit]
+Description=ct_server
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+ExecStart=/usr/local/bin/ct_server -logtostderr -log_config /etc/fulcio/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable ct_server.service
+$ sudo systemctl start ct_server.service
+$ sudo systemctl status ct_server.service
+```
 
 Next: [Configure Registry](08-configure-registry.md)

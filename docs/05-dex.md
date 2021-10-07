@@ -10,51 +10,135 @@ certificates
 
 Connect to the compute instance
 
-```
-gcloud compute ssh --zone "europe-west1-b" "sigstore-oauth2"  --project "sigstore-the-hard-way-proj"
+```bash
+$ gcloud compute ssh sigstore-oauth2
 ```
 
 ## Dependencies
 
-```
-sudo apt-get update -y
-```
-
-```
-sudo apt-get install haproxy make git gcc certbot -y
+```bash
+$ sudo apt-get update -y
 ```
 
-### Install go 1.16
+If you want to save up some time, remove man-db first
+
+```bash
+$ sudo apt-get remove -y --purge man-db
+```
+
+```bash
+$ sudo apt-get install haproxy make git gcc certbot -y
+```
+
+### Install latest golang compiler
 
 Download and run the golang installer (system package is not yet 1.16)
 
-```
-curl -O https://storage.googleapis.com/golang/getgo/installer_linux
-```
-
-```
-chmod +x installer_linux
+```bash
+$ curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 ```
 
-```
-./installer_linux
+```bash
+$ chmod +x installer_linux
 ```
 
-## Let's encrypt (TLS) & HA Proxy config
+```bash
+$ ./installer_linux
+```
 
+e.g.
+
+```
+Welcome to the Go installer!
+Downloading Go version go1.17.1 to /home/luke/.go
+This may take a bit of time...
+Downloaded!
+Setting up GOPATH
+GOPATH has been set up!
+
+One more thing! Run `source /home/$USER/.bash_profile` to persist the
+new environment variables to your current session, or open a
+new shell prompt.
+```
+
+As suggested run
+
+```bash
+$ source /home/$USER/.bash_profile
+$ go version
+go version go1.17.1 linux/amd64
+```
+
+### Let's encrypt (TLS) & HA Proxy config
 
 Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
 private `IP` address
 
-Set up some specifics
-
-```
-DOMAIN=oauth2.yourdomain.com
-IP=10.240.0.12
+```bash
+DOMAIN="oauth2.yourdomain.com"
+IP="10.240.0.12"
 ```
 
+Let's now run certbot to obtain our TLS certs.
+
+```bash
+$ sudo certbot certonly --standalone --preferred-challenges http \
+      --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
+      --non-interactive --agree-tos --email youremail@domain.com
 ```
-cat > ~/haproxy.cfg <<EOF
+
+Move the PEM chain into place
+
+```bash
+$ sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
+    "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" \
+    | sudo tee "/etc/ssl/private/${DOMAIN}.pem" > /dev/null
+```
+
+Now we need to change certbot configuration for automatic renewal
+
+Prepare post renewal script
+
+```bash
+$ cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+#!/bin/bash
+
+DOMAIN="oauth2.example.com"
+
+cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
+    "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" \
+    > "/etc/ssl/private/${DOMAIN}.pem"
+
+systemctl reload haproxy.service
+```
+
+Make sure the script has executable flag set
+
+```bash
+$ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+```
+
+Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
+
+```bash
+$ ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
+```
+
+```
+http01_port = 9080
+http01_address = 127.0.0.1
+```
+
+Append new line
+
+```
+post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+```
+
+Prepare haproxy configuration
+
+```bash
+$ cat > haproxy.cfg <<EOF
 defaults
     timeout connect 10s
     timeout client 30s
@@ -73,52 +157,47 @@ frontend haproxy
     # HTTPS redirect
     redirect scheme https code 301 if !{ ssl_fc }
 
-    default_backend sigstore_oauth2
-
     acl letsencrypt-acl path_beg /.well-known/acme-challenge/
     use_backend letsencrypt-backend if letsencrypt-acl
 
-    server sigstore_oauth2_internal 0.0.0.0:6000
+    default_backend sigstore_dex
+
+backend sigstore_dex
+    server sigstore_oauth2_internal ${IP}:6000
+
+backend letsencrypt-backend
+    server certbot_internal 127.0.0.1:9080
+EOF
 ```
 
-```
-sudo mv haproxy.cfg /etc/haproxy/
+Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
+
+If so, move it into place
+
+```bash
+$ sudo mv haproxy.cfg /etc/haproxy/
 ```
 
-Let's now run certbot to obtain our TLS certs (change the email flag).
+Check syntax
 
-```
-sudo certbot certonly --standalone --preferred-challenges http \
-      --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
-      --non-interactive --agree-tos --email jdoe@example.com
-```
-
-
-```
-sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
-     "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" \
-     > "./${DOMAIN}.pem"
-
-```
-
-Move the PEM chain into place
-```
-sudo cp ./${DOMAIN}.pem /etc/ssl/private/${DOMAIN}.pem
+```bash
+$ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 ```
 
 ### Start HAProxy
 
 Let's now start HAProxy
 
-```
-sudo systemctl enable haproxy.service
+```bash
+$ sudo systemctl enable haproxy.service
 
 Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable haproxy
+```
 
-sudo systemctl start haproxy.service
-
-sudo systemctl status haproxy.service
+```bash
+$ sudo systemctl restart haproxy.service
+$ sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -135,20 +214,26 @@ Jul 18 10:12:27 sigstore-fulcio systemd[1]: Starting HAProxy Load Balancer...
 Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 ```
 
-## Install Dex
+Test automatic renewal
 
-```
-mkdir -p ~/go/src/github.com/dexidp/ && cd "$_"
-git clone https://github.com/dexidp/dex.git
-```
-
-```
-cd dex
-make build
-sudo mv bin/dex /usr/local/bin/
+```bash
+$ sudo certbot renew --dry-run
 ```
 
-## Obtain Google OAUTH credentials
+### Install Dex
+
+```bash
+$ mkdir -p ~/go/src/github.com/dexidp/ && cd "$_"
+$ git clone https://github.com/dexidp/dex.git
+```
+
+```bash
+$ cd dex
+$ make build
+$ sudo mv bin/dex /usr/local/bin/
+```
+
+### Obtain Google OAUTH credentials
 
 > 📝 We re using Google here, you can do the same for github and microsoft too.
   The placeholders are already within `config.yaml`
@@ -157,50 +242,57 @@ sudo mv bin/dex /usr/local/bin/
 
 2. Select 'CONFIGURE CONSENT SCREEN'
 
-Select 'Internal'
+    Select 'Internal'
 
-![consent](images/oauth-consent.png)
+    ![consent](images/oauth-consent.png)
 
-NOTE: If you're not a Google Workspace user, the 'Internal' option will not be available. You can only make your app available to external (general audience) users only. In such a case, the 'External' User Type works fine as well. 
+    NOTE: If you're not a Google Workspace user, the 'Internal' option will not be available. You can only make your app available to external (general audience) users only. In such a case, the 'External' User Type works fine as well. 
 
-Fill out the app resgistration details
+    Fill out the app registration details
 
-![consent](images/app-reg.png)
+    ![consent](images/app-reg.png)
 
 3. Set scopes
 
-Select 'ADD OR REMOVE SCOPES' and set the `userinfo.email` scope
+    Select 'ADD OR REMOVE SCOPES' and set the `userinfo.email` scope
 
-![scopes](images/scopes.png)
+    ![scopes](images/scopes.png)
 
-Select "SAVE AND CONTINUE"
+    Select "SAVE AND CONTINUE"
 
-Select "BACK TO DASHBOARD" and select 'Credentials'
+    Select "BACK TO DASHBOARD" and select 'Credentials'
 
 4. Create OAuth Client ID
 
-![credentials](images/oauth-credentials.png)
+    ![credentials](images/oauth-credentials.png)
 
-Select "Web Application" and fill out the "Authorized Redirect URIs"
+    Select "Web Application" and fill out the "Authorized Redirect URIs"
 
-Select "CREATE"
+    Select "CREATE"
 
-![redirect-uri](images/oauth-redirect.png)
+    ![redirect-uri](images/oauth-redirect.png)
 
 5. Note down tour Client ID and Secret and keep them safe (we will need them for dex)
 
-## Configure Dex
+### Configure Dex
 
 Set up the configuration file for dex.
 
+Provide saved OIDC details as variables
+
+```bash
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
 ```
-cat > ~/dex-config.yaml <<EOF
+
+```bash
+$ cat > dex-config.yaml <<EOF
 issuer: https://${DOMAIN}/auth
 
 storage:
   type: sqlite3
   config:
-    file: dex.db
+    file: /var/dex/dex.db
 web:
   http: 0.0.0.0:5556
 frontend:
@@ -226,7 +318,9 @@ staticClients:
   - id: sigstore
     public: true
     name: 'sigstore'
-    redirectURI: https://${DOMAIN}/auth/callback
+    redirectURIs:
+    - 'https://${DOMAIN}/auth/callback'
+    - 'http://localhost:5556/auth/callback'
 
 connectors:
 - type: google
@@ -255,15 +349,45 @@ connectors:
 EOF
 ```
 
-Afterwards open the file and replace `$GOOGLE_CLIENT_ID` with
-your OAuth2 Client ID and the `$GOOGLE_CLIENT_SECRET` with your
-OAuth2 Client Secret
+Move configuration file
 
-
-## Start dex
-
+```bash
+$ sudo mkdir -p /var/dex/
+$ sudo mkdir -p /etc/dex/
+$ sudo mv dex-config.yaml /etc/dex/
 ```
-dex serve --web-http-addr=0.0.0.0:6000  dex-config.yaml
+
+### Start dex
+
+```bash
+$ dex serve --web-http-addr=0.0.0.0:6000  dex-config.yaml
+```
+
+You may create a bare minimal systemd service for dex
+
+```bash
+$ cat /etc/systemd/system/dex.service
+[Unit]
+Description=dex
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+ExecStart=/usr/local/bin/dex serve --web-http-addr=0.0.0.0:6000 /etc/dex/dex-config.yaml
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+$ sudo systemctl daemon-reload
+$ sudo systemctl enable dex.service
+$ sudo systemctl start dex.service
+$ sudo systemctl status dex.service
 ```
 
 Next: [Fulcio](06-fulcio.md)
