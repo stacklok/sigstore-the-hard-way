@@ -45,22 +45,6 @@ sigstore-the-hard-way-allow-external       sigstore-the-hard-way-proj  INGRESS  
 sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS    1000      tcp,udp,icmp                      False
 ```
 
-Create an external IP range
-
-```bash
-$ gcloud compute addresses create sigstore-the-hard-way-proj \
-    --region $(gcloud config get-value compute/region)
-```
-
-Verify the external IP range
-
-```bash
-$ gcloud compute addresses list --filter="name=('sigstore-the-hard-way-proj')"
-
-NAME                        ADDRESS/RANGE  TYPE      PURPOSE  NETWORK  REGION        SUBNET  STATUS
-sigstore-the-hard-way-proj  34.79.121.255  EXTERNAL                    europe-west1          RESERVED
-```
-
 ## Compute Resources
 
 Now we need to create four compute nodes for each service.
