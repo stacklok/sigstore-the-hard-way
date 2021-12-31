@@ -25,7 +25,7 @@ Create some firewall rules to allow tcp, udp and icmp protocols
 $ gcloud compute firewall-rules create sigstore-the-hard-way-proj-allow-internal \
     --allow tcp,udp,icmp \
     --network sigstore-the-hard-way-proj \
-    --source-ranges 10.240.0.0/24,10.200.0.0/16
+    --source-ranges 10.240.0.0/24
 ```
 
 ```bash
