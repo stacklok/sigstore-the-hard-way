@@ -30,7 +30,7 @@ Once you have your PAT code, login to ghcr:
 $ export CR_PAT="YOUR_TOKEN" ; echo -n "$CR_PAT" | docker login ghcr.io -u <github_user> --password-stdin
 ```
 
-## Tag and push an imag
+## Tag and push an image
 
 Now we can tag and push our image:
 
