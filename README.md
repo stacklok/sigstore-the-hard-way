@@ -35,10 +35,13 @@ for an OpenID Connect session (providers don't always like redirect_urls to IP a
 
 ## Certificate Authority
 
-For the Certificate Authority we will have two options to choose from:
+For the Certificate Authority we will have three options to choose from:
 
+* File CA
 * [SoftHSM](http://www.softhsm.org/)
 * Google's Certificate Transparency Service
+
+The above are listed in order of setup ease. If you just want to kick the tyres and don't need a secure CA, you can use the File CA.
 
 Google's is a paid service, but easy to set up. SoftHSM is completely free, but requires a little more setup (but nothing
 too challenging)

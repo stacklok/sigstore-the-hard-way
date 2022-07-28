@@ -283,7 +283,7 @@ $ rm unenc.key
 > The private key needs a passphrase, remember it as you will need it for `your_passphrase` when we create the `ct.cfg` further down.
 
 > **Note**
-> You will need the ctfe_public.pem file for the TUF root of cosign, a little later on.
+> You will need the ctfe_public.pem file for the TUF root of cosign, with the sign-container section towards the end
 
 ### Create a Tree ID
 

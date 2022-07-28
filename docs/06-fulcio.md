@@ -238,6 +238,23 @@ Test automatic renewal
 $ sudo certbot renew --dry-run
 ```
 
+# File CA setup
+
+First we need to generate some keys and a root CA
+
+```bash
+$ openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
+$ openssl ec -in unenc.key -out file_ca_key.pem -des
+$ openssl ec -in file_ca_key.pem -pubout -out file_ca_pub.pem
+$ openssl req -new -x509 -days 365 -extensions v3_ca -key file_ca_key.pem -out fulcio-root.pem
+$ rm unenc.key
+```
+
+Copy all of the above key artifacts into `$HOME/fulcio-config/config`
+
+> **Note**
+> You will need the file_ca_pub.pem file for the TUF root of cosign, with the sign-container section towards the end
+
 # SoftHSM Installation
 
 > By default SoftHSM stores tokens in `/var/lib/softhsm/tokens/` directory, which is defined
@@ -491,6 +508,12 @@ $ sudo systemctl daemon-reload
 $ sudo systemctl enable fulcio.service
 $ sudo systemctl start fulcio.service
 $ sudo systemctl status fulcio.service
+```
+
+## File CA
+
+```bash
+fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=fulcio-config/fulcio-root.pem  --fileca-key=fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 ## SoftHSM
