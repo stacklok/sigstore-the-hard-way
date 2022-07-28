@@ -2,8 +2,16 @@
 
 We are now ready to sign our container using our own sigstore infrastructure
 
+But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server
+
+Have this file locally and set it as an environment variable
+
 ```bash
-COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer "https://oauth2.example.com/auth" -fulcio-url "https://fulcio.example.com" -rekor-url "https://rekor.example.com" ghcr.io/<github_user>/sigstore-thw:latest
+$ export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE="/path/to/ctfe_public.pem"
+```
+
+```bash
+COSIGN_EXPERIMENTAL=1 cosign sign --oidc-issuer "https://oauth2.example.com/auth" --fulcio-url "https://fulcio.example.com" --rekor-url "https://rekor.example.com" ghcr.io/<github_user>/sigstore-thw:latest
 ```
 
 > :notebook: `COSIGN_EXPERIMENTAL` does as it says, you're trying out an experimental feature here.
@@ -71,3 +79,7 @@ and tell us abour your ideas!
 If you want to improve this guide, please make an issue or better still a pull request!
 
 Don't forget to delete your instances and not take on unwanted costs!
+
+## Having issues, not working?
+
+Raise an issue (best option, as others can learn) or message me on the [sigstore slack](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ), I'm always happy to help. 

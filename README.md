@@ -68,3 +68,7 @@ If you have not guessed by name, this is based off, and comes with credit to [Ke
 * [Configure Container Registry](docs/08-configure-registry.md)
 * [Install cosign](docs/09-cosign.md)
 * [Sign a container image](docs/10-sign-container.md)
+
+## Having issues, not working?
+
+Raise an issue (best option, as others can learn) or message me on the [sigstore slack](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ), I'm always happy to help.  

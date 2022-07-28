@@ -266,7 +266,7 @@ $ sudo mv bin/dex /usr/local/bin/
 
     ![credentials](images/oauth-credentials.png)
 
-    Select "Web Application" and fill out the "Authorized Redirect URIs"
+    Select "OAuth client ID". Select "Web Application" and fill out the "Authorized Redirect URIs"
 
     Select "CREATE"
 
@@ -318,9 +318,7 @@ staticClients:
   - id: sigstore
     public: true
     name: 'sigstore'
-    redirectURIs:
-    - 'https://${DOMAIN}/auth/callback'
-    - 'http://localhost:5556/auth/callback'
+redirectURI: https://${DOMAIN}/auth/callback
 
 connectors:
 - type: google

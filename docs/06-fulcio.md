@@ -80,7 +80,7 @@ go version go1.17.1 linux/amd64
 ### Install Fulcio
 
 ```bash
-$ go install github.com/sigstore/fulcio@v0.1.1
+$ go install github.com/sigstore/fulcio@v0.5.2
 ```
 
 ```bash
@@ -244,13 +244,13 @@ $ sudo certbot renew --dry-run
   in `/etc/softhsm/softhsm2.conf` configuration file, below we will define a custom configuration for fulcio.
 
 ```bash
-$ sudo mkdir -p /etc/fulcio-config/config
-$ sudo mkdir -p /etc/fulcio-config/tokens
+$ mkdir -p $HOME/fulcio-config/config
+$ mkdir $HOME/fulcio-config/tokens
 ```
 
 ```bash
-$ cat <<'EOF' | sudo tee /etc/fulcio-config/config/softhsm2.cfg > /dev/null
-directories.tokendir = /etc/fulcio-config/tokens
+$ cat <<EOF | tee $HOME/fulcio-config/config/softhsm2.cfg > /dev/null
+directories.tokendir = $HOME/fulcio-config/tokens
 objectstore.backend = file
 log.level = INFO
 slots.removable = false
@@ -258,31 +258,27 @@ EOF
 ```
 
 ```bash
-$ export SOFTHSM2_CONF="/etc/fulcio-config/config/softhsm2.cfg"
+$ export SOFTHSM2_CONF="$HOME/fulcio-config/config/softhsm2.cfg"
 ```
 
 ```bash
-$ echo 'export SOFTHSM2_CONF="/etc/fulcio-config/config/softhsm2.cfg"' >> ~/.bash_profile
+$ echo 'export SOFTHSM2_CONF="$HOME/fulcio-config/config/softhsm2.cfg"' >> ~/.bash_profile
 ```
 
 ```bash
-$ sudo -E softhsm2-util --init-token --slot 0 --label fulcio
+$ softhsm2-util --init-token --slot 0 --label fulcio --pin 2324 --so-pin 2324
 ```
+
+Tokens will now be generated in `fulcio-config\tokens`
 
 ```bash
-$ sudo -E softhsm2-util --show-slots
+$ ls -la $HOME/fulcio-config/tokens
 ```
-
-```bash
-$ ls -la /etc/fulcio-config/tokens
-```
-
-NOTE: A `-E` parameter preserves the environment variable we need, and `sudo` is needed to be able to write token into the system path.
 
 For example:
 
 ```bash
-$ sudo -E softhsm2-util --init-token --slot 0 --label fulcio
+$ softhsm2-util --init-token --slot 0 --label fulcio
 === SO PIN (4-255 characters) ===
 Please enter SO PIN: ****
 Please reenter SO PIN: ****
@@ -296,10 +292,10 @@ Please reenter user PIN: ****
 The token has been initialized and is reassigned to slot 1773686385
 ```
 
-Now remembering you pin, lets create a SoftHSM config for Fulcio
+Lets create a SoftHSM config for Fulcio
 
 ```bash
-$ cat <<'EOF' | sudo tee /etc/fulcio-config/config/crypto11.conf > /dev/null
+$ cat <<EOF | tee $HOME/fulcio-config/config/crypto11.conf > /dev/null
 {
   "Path" : "/usr/lib/softhsm/libsofthsm2.so",
   "TokenLabel": "fulcio",
@@ -308,29 +304,32 @@ $ cat <<'EOF' | sudo tee /etc/fulcio-config/config/crypto11.conf > /dev/null
 EOF
 ```
 
+> **Note**
+> The Path may vary for different OS versions.
+
 Now let's create a private key within the HSM
 
 ```bash
-$ sudo -E pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label FulcioCA --key-type EC:secp384r1
+$ pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
 ```
 
 For example:
 
 ```bash
-$ sudo -E pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label FulcioCA --key-type EC:secp384r1
+$ pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
 Using slot 0 with a present token (0x69b84e71)
 Logging in to "fulcio".
 Please enter User PIN:
 Key pair generated:
 Private Key Object; EC
-label:      FulcioCA
+label:      PKCS11CA
 ID:         01
 Usage:      decrypt, sign, unwrap, derive
 Access:     sensitive, always sensitive, never extractable, local
 Public Key Object; EC  EC_POINT 384 bits
 EC_POINT:   046104b04911577ad1a655ba469b32ae63832d6c0d19482058af1822c2b42f54934da3613cd87171594a9b00ff1f0b298c75fa9383470ec46f0b4a35e73b54c34cf2ecc664ada2d0a818a5ac2390d952cb3b8d66ebea974a1bb2465f323cbebc50927d
 EC_PARAMS:  06052b81040022
-label:      FulcioCA
+label:      PKCS11CA
 ID:         01
 Usage:      encrypt, verify, wrap, derive
 Access:     local
@@ -339,17 +338,17 @@ Access:     local
 Now its time to create a Root CA using our newly minted private key:
 
 ```bash
-$ cd /etc/fulcio-config/
-$ sudo -E fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
+$ cd $HOME/fulcio-config/
+$ fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
 ```
 
 An example
 
 ```bash
-$ cd /etc/fulcio-config/
-$ sudo -E fulcio createca --org=acme --country=USA --locality=Anytown --province=AnyPlace --postal-code=ABCDEF --street-address=123 Main St --hsm-caroot-id 1 --out fulcio-root.pem
+$ cd $HOME/fulcio-config/
+$ fulcio createca --org=acme --country=USA --locality=Anytown --province=AnyPlace --postal-code=ABCDEF --street-address=123 Main St --hsm-caroot-id 1 --out fulcio-root.pem
 2021-10-01T18:09:16.284Z        INFO    app/createca.go:48      binding to PKCS11 HSM
-2021-10-01T18:09:16.289Z        INFO    app/createca.go:68      finding slot for private key: FulcioCA
+2021-10-01T18:09:16.289Z        INFO    app/createca.go:68      finding slot for private key: PKCS11CA
 2021-10-01T18:09:16.304Z        INFO    app/createca.go:108     Root CA:
 -----BEGIN CERTIFICATE-----
 MIICJDCCAaqgAwIBAgIIVUu5cbwBx8EwCgYIKoZIzj0EAwMwVjELMAkGA1UEBhMC
@@ -378,7 +377,7 @@ X509v3 Key Usage: critical
     Certificate Sign, CRL Sign
 ```
 
-Transfer the root certificate over to the certificate transparency log
+Transfer the root certificate over to the certificate transparency log (or copy / paste into a text file for later).
 
 ```bash
 $ gcloud compute scp fulcio-root.pem <google_account_name>@sigstore-ctl:~/
@@ -431,28 +430,33 @@ OAUTH2_DOMAIN="oauth2.example.com"
 ```
 
 ```bash
-$ cat > config.json <<EOF
-    {
-      "OIDCIssuers": {
-        "https://accounts.google.com": {
-          "IssuerURL": "https://accounts.google.com",
-          "ClientID": "sigstore",
-          "Type": "email"
-        },
-        "https://${OAUTH2_DOMAIN}/auth": {
-          "IssuerURL": "https://${OAUTH2_DOMAIN}/auth",
-          "ClientID": "sigstore",
-          "Type": "email"
-        }
-      }
+$ cat > $HOME/fulcio-config/config.json <<EOF
+{
+  "OIDCIssuers": {
+    "https://accounts.google.com": {
+      "IssuerURL": "https://accounts.google.com",
+      "ClientID": "sigstore",
+      "Type": "email"
+    },
+    "https://${OAUTH2_DOMAIN}/auth": {
+      "IssuerURL": "https://${OAUTH2_DOMAIN}/auth",
+      "ClientID": "sigstore",
+      "Type": "email"
+    },
+    "https://token.actions.githubusercontent.com": {
+      "IssuerURL": "https://token.actions.githubusercontent.com",
+      "ClientID": "sigstore",
+      "Type": "github-workflow"
     }
+  }
+}
 EOF
 ```
 
 Inspect `config.json` and if everything looks in order, copy it into place
 
 ```bash
-$ sudo mv config.json /etc/fulcio-config/
+$ mv config.json $HOME/fulcio-config/
 ```
 
 # Start FulcioCA
@@ -492,8 +496,9 @@ $ sudo systemctl status fulcio.service
 ## SoftHSM
 
 ```bash
-$ fulcio serve --config-path=/etc/fulcio-config/config.json --ca=fulcioca --hsm-caroot-id=1 --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+$ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-caroot-id=1 --pkcs11-config-path=$HOME/fulcio-config/config/crypto11.conf --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
+
 
 > 📝 Don't worry that the Certificate Transparency Log is not up yet. We will
  set this up next.

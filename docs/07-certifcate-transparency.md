@@ -259,7 +259,7 @@ $ sudo systemctl status trillian_log_signer.service
 ### Install CTFE server
 
 ```bash
-$ go get -u github.com/google/certificate-transparency-go/trillian/ctfe/ct_server
+$ go install github.com/google/certificate-transparency-go/trillian/ctfe/ct_server@latest
 ```
 
 ```bash
@@ -268,17 +268,27 @@ $ sudo mv ~/go/bin/ct_server /usr/local/bin/
 
 ### Create a private key
 
-Note: The private key needs a passphrase amd remember it as you will need it for `your_passphrase`
+> **Warning**
+> The following section dumps out keys into the home directory. This is only recommended if you do not greatly care about the security of this machine
+> If you do care, place them into a more secure location and chmod to a secure level of file permissions.
 
 ```bash
 $ openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
 $ openssl ec -in unenc.key -out privkey.pem -des
+$ openssl ec -in privkey.pem -pubout -out ctfe_public.pem
+```
 $ rm unenc.key
 ```
+> **Note**
+> The private key needs a passphrase, remember it as you will need it for `your_passphrase` when we create the `ct.cfg` further down.
+
+> **Note**
+> You will need the ctfe_public.pem file for the TUF root of cosign, a little later on.
 
 ### Create a Tree ID
 
-Note: `trillian_log_server` needs to be running for this command to execute
+> **Note**
+> `trillian_log_server` needs to be running for this command to execute
 
 ```
 LOG_ID="$(createtree --admin_server localhost:8091)"
@@ -291,11 +301,11 @@ $ cat > ct.cfg <<EOF
 config {
   log_id: ${LOG_ID}
   prefix: "sigstore"
-  roots_pem_file: "/etc/fulcio/fulcio-root.pem"
+  roots_pem_file: "/etc/ctfe-config/fulcio-root.pem"
   private_key: {
     [type.googleapis.com/keyspb.PEMKeyFile] {
-       path: "/etc/fulcio/privkey.pem"
-       password: "<your_passphrase>"
+       path: "/etc/ctfe-config/privkey.pem"
+       password: "your_passphrase"
     }
   }
 }
@@ -305,19 +315,22 @@ EOF
 Afterwards, open the file again and change `<your_passphrase>` to the one you used
 when generating the private key.
 
-Note: `fulcio-root.pem` is the root ID certificate, we created in [06-fulcio](06-fulcio.md).
+> **Note**
+> `fulcio-root.pem` is the root ID certificate, we created in [06-fulcio](06-fulcio.md).
+
+
 
 ```bash
-$ sudo mkdir -p /etc/fulcio
-$ sudo mv ct.cfg /etc/fulcio/
-$ sudo mv fulcio-root.pem /etc/fulcio/
-$ sudo mv privkey.pem /etc/fulcio/
+$ sudo mkdir -p /etc/ctfe-config/
+$ sudo mv ct.cfg /etc/ctfe-config/
+$ sudo mv fulcio-root.pem /etc/ctfe-config/
+$ sudo mv privkey.pem /etc/ctfe-config/
 ```
 
 ### Start the CT log
 
 ```bash
-$ ct_server -logtostderr -log_config /etc/fulcio/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
+$ ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
 ```
 
 > 📝 The `-http_endpoint` flag uses the internal private IP. We don't need this facing externally
@@ -335,7 +348,7 @@ StartLimitIntervalSec=600
 StartLimitBurst=5
 
 [Service]
-ExecStart=/usr/local/bin/ct_server -logtostderr -log_config /etc/fulcio/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
+ExecStart=/usr/local/bin/ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
 Restart=on-failure
 RestartSec=5s
 
