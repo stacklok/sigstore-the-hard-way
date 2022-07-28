@@ -74,4 +74,12 @@ If you have not guessed by name, this is based off, and comes with credit to [Ke
 
 ## Having issues, not working?
 
-Raise an issue (best option, as others can learn) or message me on the [sigstore slack](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ), I'm always happy to help.  
+Raise an issue (best option, as others can learn) or message me on the [sigstore slack](https://join.slack.com/t/sigstore/shared_invite/zt-mhs55zh0-XmY3bcfWn4XEyMqUUutbUQ), I'm always happy to help.
+
+## Thanks!..
+@nsmith5
+@avoidik
+@AyushAmbastha
+@axelsimon
+@rebelopsio
+@mc-slava
