@@ -2,6 +2,8 @@
 
 sigstore the hard way is hosted at https://sthw.decodebytes.sh and is available for free.
 
+If the above URL does not work, you can also see the site [here](https://lukehinds.github.io/sigstore-the-hard-way/)
+
 ## contributing
 
 Should you wish to contribute, you're in the right place.
