@@ -246,7 +246,7 @@ sudo mv bin/dex /usr/local/bin/
 
     ![consent](images/oauth-consent.png)
 
-    NOTE: If you're not a Google Workspace user, the 'Internal' option will not be available. You can only make your app available to external (general audience) users only. In such a case, the 'External' User Type works fine as well. 
+    NOTE: If you're not a Google Workspace user, the 'Internal' option will not be available. You can only make your app available to external (general audience) users only. In such a case, the 'External' User Type works fine as well.
 
     Fill out the app registration details
 
@@ -387,4 +387,3 @@ sudo systemctl enable dex.service
 sudo systemctl start dex.service
 sudo systemctl status dex.service
 ```
-

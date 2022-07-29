@@ -277,7 +277,9 @@ openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
 openssl ec -in unenc.key -out privkey.pem -des
 openssl ec -in privkey.pem -pubout -out ctfe_public.pem
 ```
+
 rm unenc.key
+
 ```
 > **Note**
 > The private key needs a passphrase, remember it as you will need it for `your_passphrase` when we create the `ct.cfg` further down.
@@ -291,7 +293,9 @@ rm unenc.key
 > `trillian_log_server` needs to be running for this command to execute
 
 ```
+
 LOG_ID="$(createtree --admin_server localhost:8091)"
+
 ```
 
 ### Set up the config file
@@ -317,8 +321,6 @@ when generating the private key.
 
 > **Note**
 > `fulcio-root.pem` is the root ID certificate, we created in [06-fulcio](06-fulcio.md).
-
-
 
 ```bash
 sudo mkdir -p /etc/ctfe-config/
@@ -362,4 +364,3 @@ sudo systemctl enable ct_server.service
 sudo systemctl start ct_server.service
 sudo systemctl status ct_server.service
 ```
-

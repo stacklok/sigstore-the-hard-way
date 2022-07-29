@@ -522,7 +522,6 @@ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-
 fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-caroot-id=1 --pkcs11-config-path=$HOME/fulcio-config/config/crypto11.conf --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
-
 > 📝 Don't worry that the Certificate Transparency Log is not up yet. We will
  set this up next.
 
@@ -539,4 +538,3 @@ For example
 ```
 fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
 ```
-
