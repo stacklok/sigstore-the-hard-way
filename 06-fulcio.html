@@ -1,0 +1,590 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Fulcio - sigstore the hard way</title>
+                
+
+        <!-- Custom HTML head -->
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="How to deploy sigstore from the ground up.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+                <link rel="icon" href="favicon.svg">
+                        <link rel="shortcut icon" href="favicon.png">
+                <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+                <link rel="stylesheet" href="css/print.css" media="print">
+        
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+                <link rel="stylesheet" href="fonts/fonts.css">
+        
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+            </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="01-prerequisites.html"><strong aria-hidden="true">1.</strong> Prerequisites</a></li><li class="chapter-item expanded "><a href="02-compute-resources.html"><strong aria-hidden="true">2.</strong> Compute Resources</a></li><li class="chapter-item expanded "><a href="03-domain-configuration.html"><strong aria-hidden="true">3.</strong> Domain Configuration</a></li><li class="chapter-item expanded "><a href="04-rekor.html"><strong aria-hidden="true">4.</strong> rekor</a></li><li class="chapter-item expanded "><a href="05-dex.html"><strong aria-hidden="true">5.</strong> Dex (oauth2)</a></li><li class="chapter-item expanded "><a href="06-fulcio.html" class="active"><strong aria-hidden="true">6.</strong> Fulcio</a></li><li class="chapter-item expanded "><a href="07-certifcate-transparency.html"><strong aria-hidden="true">7.</strong> Certificate Transparency</a></li><li class="chapter-item expanded "><a href="08-configure-registry.html"><strong aria-hidden="true">8.</strong> Configure OCI Registry</a></li><li class="chapter-item expanded "><a href="09-cosign.html"><strong aria-hidden="true">9.</strong> Setup Cosign</a></li><li class="chapter-item expanded "><a href="10-sign-container.html"><strong aria-hidden="true">10.</strong> Sign a Container</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><a href="misc/contributors.html">Contributors</a></li></ol>            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                                                <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                                            </div>
+
+                    <h1 class="menu-title">sigstore the hard way</h1>
+
+                    <div class="right-buttons">
+                                                <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                                                                        
+                    </div>
+                </div>
+
+                                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="fulcio"><a class="header" href="#fulcio">Fulcio</a></h1>
+<p>Now it's time to install the Fulcio WebPKI.</p>
+<p>Fulcio requires a means to manage certificates. We have two options here,
+we can use a SoftHSM or Google Certificate Authority service.</p>
+<blockquote>
+<p>📝 As of time of writing, plans are in place to support AWS Cloud HSM and
+Azure Dedicated HSM.</p>
+</blockquote>
+<p>SSH into the Fulcio Compute instance</p>
+<pre><code class="language-bash">gcloud compute ssh sigstore-fulcio
+</code></pre>
+<h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
+<p>We need a few dependencies installed</p>
+<p>Update your system</p>
+<pre><code class="language-bash">sudo apt-get update -y
+</code></pre>
+<p>If you want to save up some time, remove man-db first</p>
+<pre><code class="language-bash">sudo apt-get remove -y --purge man-db
+</code></pre>
+<p>Grab the following packages</p>
+<pre><code class="language-bash">sudo apt-get install git gcc haproxy softhsm certbot opensc -y
+</code></pre>
+<blockquote>
+<p>📝 If you plan to use GCP Certificate Service, you can drop SoftHSM and opensc</p>
+</blockquote>
+<h3 id="install-latest-golang-compiler"><a class="header" href="#install-latest-golang-compiler">Install latest golang compiler</a></h3>
+<p>Download and run the golang installer (system package is not yet 1.16)</p>
+<pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
+</code></pre>
+<pre><code class="language-bash">chmod +x installer_linux
+</code></pre>
+<pre><code class="language-bash">./installer_linux
+</code></pre>
+<p>e.g.</p>
+<pre><code>Welcome to the Go installer!
+Downloading Go version go1.17.1 to /home/luke/.go
+This may take a bit of time...
+Downloaded!
+Setting up GOPATH
+GOPATH has been set up!
+
+One more thing! Run `source /home/$USER/.bash_profile` to persist the
+new environment variables to your current session, or open a
+new shell prompt.
+</code></pre>
+<p>As suggested run</p>
+<pre><code class="language-bash">source /home/$USER/.bash_profile
+go version
+go version go1.17.1 linux/amd64
+</code></pre>
+<h3 id="install-fulcio"><a class="header" href="#install-fulcio">Install Fulcio</a></h3>
+<pre><code class="language-bash">go install github.com/sigstore/fulcio@v0.5.2
+</code></pre>
+<pre><code class="language-bash">sudo mv ~/go/bin/fulcio /usr/local/bin/
+</code></pre>
+<h3 id="lets-encrypt-tls--ha-proxy-config"><a class="header" href="#lets-encrypt-tls--ha-proxy-config">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
+<p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
+private <code>IP</code> address</p>
+<pre><code class="language-bash">DOMAIN=&quot;fulcio.yourdomain.com&quot;
+IP=&quot;10.240.0.11&quot;
+</code></pre>
+<p>Let's now run certbot to obtain our TLS certs.</p>
+<pre><code class="language-bash">sudo certbot certonly --standalone --preferred-challenges http \
+      --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
+      --non-interactive --agree-tos --email youremail@domain.com
+</code></pre>
+<p>Move the PEM chain into place</p>
+<pre><code class="language-bash">sudo cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
+    &quot;/etc/letsencrypt/live/${DOMAIN}/privkey.pem&quot; \
+    | sudo tee &quot;/etc/ssl/private/${DOMAIN}.pem&quot; &gt; /dev/null
+</code></pre>
+<p>Now we need to change certbot configuration for automatic renewal</p>
+<p>Prepare post renewal script</p>
+<pre><code class="language-bash">cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+#!/bin/bash
+
+DOMAIN=&quot;fulcio.example.com&quot;
+
+cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
+    &quot;/etc/letsencrypt/live/${DOMAIN}/privkey.pem&quot; \
+    &gt; &quot;/etc/ssl/private/${DOMAIN}.pem&quot;
+
+systemctl reload haproxy.service
+</code></pre>
+<p>Make sure the script has executable flag set</p>
+<pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+</code></pre>
+<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)</p>
+<pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/fulcio.example.com.conf
+</code></pre>
+<pre><code>http01_port = 9080
+http01_address = 127.0.0.1
+</code></pre>
+<p>Append new line</p>
+<pre><code>post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+</code></pre>
+<p>Prepare haproxy configuration</p>
+<pre><code class="language-bash">cat &gt; haproxy.cfg &lt;&lt;EOF
+defaults
+    timeout connect 10s
+    timeout client 30s
+    timeout server 30s
+    log global
+    mode http
+    option httplog
+    maxconn 3000
+    log 127.0.0.1 local0
+
+frontend haproxy
+    #public IP address
+    bind ${IP}:80
+    bind ${IP}:443 ssl crt /etc/ssl/private/${DOMAIN}.pem
+
+    # HTTPS redirect
+    redirect scheme https code 301 if !{ ssl_fc }
+
+    acl letsencrypt-acl path_beg /.well-known/acme-challenge/
+    use_backend letsencrypt-backend if letsencrypt-acl
+
+    default_backend sigstore_fulcio
+
+backend sigstore_fulcio
+    server sigstore_fulcio_internal 0.0.0.0:5000
+
+backend letsencrypt-backend
+    server certbot_internal 127.0.0.1:9080
+EOF
+</code></pre>
+<p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
+<p>If so, move it into place</p>
+<pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
+</code></pre>
+<p>Check syntax</p>
+<pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
+</code></pre>
+<h3 id="start-haproxy"><a class="header" href="#start-haproxy">Start HAProxy</a></h3>
+<p>Let's now start HAProxy</p>
+<pre><code class="language-bash">sudo systemctl enable haproxy.service
+
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
+</code></pre>
+<pre><code class="language-bash">sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
+● haproxy.service - HAProxy Load Balancer
+   Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
+   Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
+     Docs: man:haproxy(1)
+           file:/usr/share/doc/haproxy/configuration.txt.gz
+ Main PID: 439 (haproxy)
+    Tasks: 2 (limit: 2322)
+   Memory: 4.1M
+   CGroup: /system.slice/haproxy.service
+           ├─439 /usr/sbin/haproxy -Ws -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid
+           └─444 /usr/sbin/haproxy -Ws -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid
+
+Jul 18 10:12:27 sigstore-fulcio systemd[1]: Starting HAProxy Load Balancer...
+Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
+</code></pre>
+<p>Test automatic renewal</p>
+<pre><code class="language-bash">sudo certbot renew --dry-run
+</code></pre>
+<h1 id="file-ca-setup"><a class="header" href="#file-ca-setup">File CA setup</a></h1>
+<p>First we need to generate some keys and a root CA</p>
+<pre><code class="language-bash">openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
+openssl ec -in unenc.key -out file_ca_key.pem -des
+openssl ec -in file_ca_key.pem -pubout -out file_ca_pub.pem
+openssl req -new -x509 -days 365 -extensions v3_ca -key file_ca_key.pem -out fulcio-root.pem
+rm unenc.key
+</code></pre>
+<p>Copy all of the above key artifacts into <code>$HOME/fulcio-config/config</code></p>
+<blockquote>
+<p><strong>Note</strong>
+You will need the file_ca_pub.pem file for the TUF root of cosign, with the sign-container section towards the end</p>
+</blockquote>
+<h1 id="softhsm-installation"><a class="header" href="#softhsm-installation">SoftHSM Installation</a></h1>
+<blockquote>
+<p>By default SoftHSM stores tokens in <code>/var/lib/softhsm/tokens/</code> directory, which is defined
+in <code>/etc/softhsm/softhsm2.conf</code> configuration file, below we will define a custom configuration for fulcio.</p>
+</blockquote>
+<pre><code class="language-bash">mkdir -p $HOME/fulcio-config/config
+mkdir $HOME/fulcio-config/tokens
+</code></pre>
+<pre><code class="language-bash">cat &lt;&lt;EOF | tee $HOME/fulcio-config/config/softhsm2.cfg &gt; /dev/null
+directories.tokendir = $HOME/fulcio-config/tokens
+objectstore.backend = file
+log.level = INFO
+slots.removable = false
+EOF
+</code></pre>
+<pre><code class="language-bash">export SOFTHSM2_CONF=&quot;$HOME/fulcio-config/config/softhsm2.cfg&quot;
+</code></pre>
+<pre><code class="language-bash">echo 'export SOFTHSM2_CONF=&quot;$HOME/fulcio-config/config/softhsm2.cfg&quot;' &gt;&gt; ~/.bash_profile
+</code></pre>
+<pre><code class="language-bash">softhsm2-util --init-token --slot 0 --label fulcio --pin 2324 --so-pin 2324
+</code></pre>
+<p>Tokens will now be generated in <code>fulcio-config\tokens</code></p>
+<pre><code class="language-bash">ls -la $HOME/fulcio-config/tokens
+</code></pre>
+<p>For example:</p>
+<pre><code class="language-bash">softhsm2-util --init-token --slot 0 --label fulcio
+=== SO PIN (4-255 characters) ===
+Please enter SO PIN: ****
+Please reenter SO PIN: ****
+=== User PIN (4-255 characters) ===
+Please enter user PIN: ****
+Please reenter user PIN: ******
+ERROR: The entered PINs are not equal.
+=== User PIN (4-255 characters) ===
+Please enter user PIN: ****
+Please reenter user PIN: ****
+The token has been initialized and is reassigned to slot 1773686385
+</code></pre>
+<p>Lets create a SoftHSM config for Fulcio</p>
+<pre><code class="language-bash">cat &lt;&lt;EOF | tee $HOME/fulcio-config/config/crypto11.conf &gt; /dev/null
+{
+  &quot;Path&quot; : &quot;/usr/lib/softhsm/libsofthsm2.so&quot;,
+  &quot;TokenLabel&quot;: &quot;fulcio&quot;,
+  &quot;Pin&quot; : &quot;2324&quot;
+}
+EOF
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>
+The Path may vary for different OS versions.</p>
+</blockquote>
+<p>Now let's create a private key within the HSM</p>
+<pre><code class="language-bash">pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
+</code></pre>
+<p>For example:</p>
+<pre><code class="language-bash">pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
+Using slot 0 with a present token (0x69b84e71)
+Logging in to &quot;fulcio&quot;.
+Please enter User PIN:
+Key pair generated:
+Private Key Object; EC
+label:      PKCS11CA
+ID:         01
+Usage:      decrypt, sign, unwrap, derive
+Access:     sensitive, always sensitive, never extractable, local
+Public Key Object; EC  EC_POINT 384 bits
+EC_POINT:   046104b04911577ad1a655ba469b32ae63832d6c0d19482058af1822c2b42f54934da3613cd87171594a9b00ff1f0b298c75fa9383470ec46f0b4a35e73b54c34cf2ecc664ada2d0a818a5ac2390d952cb3b8d66ebea974a1bb2465f323cbebc50927d
+EC_PARAMS:  06052b81040022
+label:      PKCS11CA
+ID:         01
+Usage:      encrypt, verify, wrap, derive
+Access:     local
+</code></pre>
+<p>Now its time to create a Root CA using our newly minted private key:</p>
+<pre><code class="language-bash">cd $HOME/fulcio-config/
+fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
+</code></pre>
+<p>An example</p>
+<pre><code class="language-bash">cd $HOME/fulcio-config/
+fulcio createca --org=acme --country=USA --locality=Anytown --province=AnyPlace --postal-code=ABCDEF --street-address=123 Main St --hsm-caroot-id 1 --out fulcio-root.pem
+2021-10-01T18:09:16.284Z        INFO    app/createca.go:48      binding to PKCS11 HSM
+2021-10-01T18:09:16.289Z        INFO    app/createca.go:68      finding slot for private key: PKCS11CA
+2021-10-01T18:09:16.304Z        INFO    app/createca.go:108     Root CA:
+-----BEGIN CERTIFICATE-----
+MIICJDCCAaqgAwIBAgIIVUu5cbwBx8EwCgYIKoZIzj0EAwMwVjELMAkGA1UEBhMC
+TFYxCzAJBgNVBAgTAkxWMQswCQYDVQQHEwJMVjENMAsGA1UECRMESG9tZTEPMA0G
+A1UEERMGTFYxMDI2MQ0wCwYDVQQKEwRhY21lMB4XDTIxMTAwMTE4MDkxNloXDTMx
+MTAwMTE4MDkxNlowVjELMAkGA1UEBhMCTFYxCzAJBgNVBAgTAkxWMQswCQYDVQQH
+EwJMVjENMAsGA1UECRMESG9tZTEPMA0GA1UEERMGTFYxMDI2MQ0wCwYDVQQKEwRh
+Y21lMHYwEAYHKoZIzj0CAQYFK4EEACIDYgAEk4wYXHkLhdDlUlASZc65GI+5VDv3
+OqmFdOI7/TwnPfrqFBNCxTPp0qNh7//s55tRac5pkXV4Af+xWUETlRd6RqBKcjjX
+PHMZ0f+J/pZui4pPmw3ItvVCqfmNvCtASksSo0UwQzAOBgNVHQ8BAf8EBAMCAQYw
+EgYDVR0TAQH/BAgwBgEB/wIBATAdBgNVHQ4EFgQUOXQnhKM/yhGTICrrgO78QyVN
+nUMwCgYIKoZIzj0EAwMDaAAwZQIwEd1VjWI+P3eXMwUOGXbWJMYzrpcLakwj0JPW
+Bx6oFXBadm4jZoKQX1FfNXMWgu0mAjEA4nz6OBtF8YJGRS9bTnWfe4V/lwukRczk
+OPl9CeCgaJqQRXlMSw8uf3nO0rYXTGCF
+-----END CERTIFICATE-----
+
+2021-10-01T18:09:16.324Z        INFO    app/createca.go:122     root CA created with PKCS11 ID: 1
+2021-10-01T18:09:16.324Z        INFO    app/createca.go:138     root CA saved to file: fulcio-root.pem
+</code></pre>
+<p>Check Root CA key usage</p>
+<pre><code class="language-bash">openssl x509 -in fulcio-root.pem -noout -ext extendedKeyUsage,keyUsage
+X509v3 Key Usage: critical
+    Certificate Sign, CRL Sign
+</code></pre>
+<p>Transfer the root certificate over to the certificate transparency log (or copy / paste into a text file for later).</p>
+<pre><code class="language-bash">gcloud compute scp fulcio-root.pem &lt;google_account_name&gt;@sigstore-ctl:~/
+</code></pre>
+<h1 id="google-certificate-authority-service"><a class="header" href="#google-certificate-authority-service">Google Certificate Authority Service</a></h1>
+<p>Navigate to the <a href="https://console.cloud.google.com/marketplace/product/google/privateca.googleapis.com">Certificate Authority Service API</a> and enable the service</p>
+<p><img src="images/enable_gcp_ca.png" alt="Enable CA" /></p>
+<p>On the Google Cloud Console page, go to Security &gt; Certificate Authority Service &gt; Create CA</p>
+<ol>
+<li>
+<p>Set the CA type (DevOps)</p>
+<p><img src="images/ca_type.png" alt="CA Type" /></p>
+</li>
+<li>
+<p>Set the cert subject details</p>
+<p><img src="images/subj_name.png" alt="Subject" /></p>
+</li>
+<li>
+<p>Set the key and algorithm to Ecliptic Curve P384</p>
+<p><img src="images/ecp384.png" alt="ecp384" /></p>
+</li>
+<li>
+<p>Leave Configure Artifacts as it is</p>
+<p><img src="images/rev.png" alt="rev" /></p>
+</li>
+<li>
+<p>Label (don't need one)</p>
+<p><img src="images/label.png" alt="label" /></p>
+</li>
+<li>
+<p>Create the CA</p>
+<p><img src="images/create.png" alt="Create CA" /></p>
+</li>
+<li>
+<p>Note down the Root CA and Resource name</p>
+<p><img src="images/view.png" alt="Overview A" /></p>
+<p><img src="images/view_two.png" alt="Overview B" /></p>
+</li>
+</ol>
+<h1 id="fulcio-config"><a class="header" href="#fulcio-config">Fulcio Config</a></h1>
+<p>Set the DNS for the OAuth2 / Dex Server</p>
+<pre><code class="language-bash">OAUTH2_DOMAIN=&quot;oauth2.example.com&quot;
+</code></pre>
+<pre><code class="language-bash">cat &gt; $HOME/fulcio-config/config.json &lt;&lt;EOF
+{
+  &quot;OIDCIssuers&quot;: {
+    &quot;https://accounts.google.com&quot;: {
+      &quot;IssuerURL&quot;: &quot;https://accounts.google.com&quot;,
+      &quot;ClientID&quot;: &quot;sigstore&quot;,
+      &quot;Type&quot;: &quot;email&quot;
+    },
+    &quot;https://${OAUTH2_DOMAIN}/auth&quot;: {
+      &quot;IssuerURL&quot;: &quot;https://${OAUTH2_DOMAIN}/auth&quot;,
+      &quot;ClientID&quot;: &quot;sigstore&quot;,
+      &quot;Type&quot;: &quot;email&quot;
+    },
+    &quot;https://token.actions.githubusercontent.com&quot;: {
+      &quot;IssuerURL&quot;: &quot;https://token.actions.githubusercontent.com&quot;,
+      &quot;ClientID&quot;: &quot;sigstore&quot;,
+      &quot;Type&quot;: &quot;github-workflow&quot;
+    }
+  }
+}
+EOF
+</code></pre>
+<p>Inspect <code>config.json</code> and if everything looks in order, copy it into place</p>
+<pre><code class="language-bash">mv config.json $HOME/fulcio-config/
+</code></pre>
+<h1 id="start-fulcioca"><a class="header" href="#start-fulcioca">Start FulcioCA</a></h1>
+<p>We now have two methods of starting Fulcio depending on your Certificate
+Authority system choice.</p>
+<p>In both cases you may create a bare minimal systemd service</p>
+<pre><code class="language-bash">cat /etc/systemd/system/fulcio.service
+[Unit]
+Description=fulcio
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+Environment=SOFTHSM2_CONF=/etc/fulcio-config/config/softhsm2.cfg
+ExecStart=/usr/local/bin/fulcio serve --config-path=/etc/fulcio-config/config.json ...
+WorkingDirectory=/etc/fulcio-config
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+<pre><code class="language-bash">sudo systemctl daemon-reload
+sudo systemctl enable fulcio.service
+sudo systemctl start fulcio.service
+sudo systemctl status fulcio.service
+</code></pre>
+<h2 id="file-ca"><a class="header" href="#file-ca">File CA</a></h2>
+<pre><code class="language-bash">fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=fulcio-config/fulcio-root.pem  --fileca-key=fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+</code></pre>
+<h2 id="softhsm"><a class="header" href="#softhsm">SoftHSM</a></h2>
+<pre><code class="language-bash">fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-caroot-id=1 --pkcs11-config-path=$HOME/fulcio-config/config/crypto11.conf --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+</code></pre>
+<blockquote>
+<p>📝 Don't worry that the Certificate Transparency Log is not up yet. We will
+set this up next.</p>
+</blockquote>
+<h2 id="google-certificate-authority-service-1"><a class="header" href="#google-certificate-authority-service-1">Google Certificate Authority Service</a></h2>
+<pre><code class="language-bash">fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+</code></pre>
+<blockquote>
+<p>📝 Your resource name is a long POSIX type path string, e.g. <code>projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx</code></p>
+</blockquote>
+<p>For example</p>
+<pre><code>fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="05-dex.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+                                                    <a rel="next" href="07-certifcate-transparency.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="05-dex.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+                                    <a rel="next" href="07-certifcate-transparency.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                            </nav>
+
+        </div>
+
+        
+        
+        
+                <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        
+        
+                <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        
+    </body>
+</html>
