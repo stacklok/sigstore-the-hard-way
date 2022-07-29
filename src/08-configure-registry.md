@@ -2,7 +2,7 @@
 
 To switch things up, we will use Github Container registry (ghcr.io)
 to push an image and a signature with cosign. You can however
-using an OCI registry, [see here](https://github.com/sigstore/cosign#registry-support) 
+using an OCI registry, [see here](https://github.com/sigstore/cosign#registry-support)
 for a list of those currently supported by cosign.
 
 First, let's create an image. You can use the following `Dockerfile` or any existing image
@@ -53,4 +53,3 @@ The push refers to repository [ghcr.io/lukehinds/sigstore-thw]
 cb381a32b229: Pushed
 latest: digest: sha256:568999d4aedd444465c442617666359ddcd4dc117b22375983d2576c3847c9ba size: 528
 ```
-

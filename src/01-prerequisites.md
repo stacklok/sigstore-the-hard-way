@@ -43,4 +43,3 @@ gcloud config set compute/zone europe-west1-b
 ```
 
 > 📝 Use the `gcloud compute zones list` command to view additional regions and zones.
-

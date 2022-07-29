@@ -5,7 +5,7 @@ Welcome to sigstore the hard way.
 The driver for this project is to get potential users, developers or collaborators familiar with the inner workings of
 sigstore's infrastructure.
 
-To best achieve a good familiarity with sigstore, we will walk through the whole process manually. 
+To best achieve a good familiarity with sigstore, we will walk through the whole process manually.
 
 Building "by hand" provides a view of how each component project in sigstore glues together, while deliberately avoiding automation.  This
 means no Dockerfiles or deployment framework playbooks. Everything is set up manually.

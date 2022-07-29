@@ -1,6 +1,8 @@
 # sigstore the hardway
 
-sigstore the hard way is hosted at https://sthw.decodebytes.sh and is available for free.
+![Publish Status](https://github.com/lukehinds/sigstore-the-hard-way/workflows/publish/badge.svg)
+
+sigstore the hard way is hosted at <https://sthw.decodebytes.sh> and is available for free.
 
 If the above URL does not work, you can also see the site [here](https://lukehinds.github.io/sigstore-the-hard-way/)
 
@@ -11,10 +13,9 @@ Should you wish to contribute, you're in the right place.
 Building the sigstore the hard way requires [mdBook].
 
 [mdBook]: https://github.com/rust-lang-nursery/mdBook
-[rust-mdbook]: https://github.com/rust-lang/rust/blob/master/src/tools/rustbook/Cargo.toml
 
 ```bash
-$ cargo install mdbook
+cargo install mdbook
 ```
 
 Once installed you can use the `mdbook` command to view in realtime the sigstore-the-hardway documentation.
@@ -31,7 +32,7 @@ Before you push, please test:
 To run the tests:
 
 ```bash
-$ mdbook test
+mdbook test
 ```
 
 ### Translations
