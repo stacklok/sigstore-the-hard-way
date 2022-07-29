@@ -13,7 +13,7 @@ Now that are instances are running, lets grab the external IP's and set up domai
 Grab your external / public IP
 
 ```bash
-$ gcloud compute instances describe sigstore-rekor \
+gcloud compute instances describe sigstore-rekor \
   --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
 
@@ -27,7 +27,7 @@ To create resource records on Google,
 If you're using GCP as the DNS provider this can be done as follows
 
 ```bash
-$ gcloud dns record-sets create rekor.example.com. \
+gcloud dns record-sets create rekor.example.com. \
   --rrdatas=$(gcloud compute instances describe sigstore-rekor --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 ```
@@ -41,14 +41,14 @@ $ gcloud dns record-sets create rekor.example.com. \
 Now repeat the same for fulcio, and dex
 
 ```bash
-$ gcloud compute instances describe sigstore-fulcio \
+gcloud compute instances describe sigstore-fulcio \
   --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
 
 If you're using GCP as the DNS provider this can be done as follows
 
 ```bash
-$ gcloud dns record-sets create fulcio.example.com. \
+gcloud dns record-sets create fulcio.example.com. \
   --rrdatas=$(gcloud compute instances describe sigstore-fulcio --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 ```
@@ -60,14 +60,14 @@ $ gcloud dns record-sets create fulcio.example.com. \
 ### oauth2.example.com
 
 ```bash
-$ gcloud compute instances describe sigstore-oauth2 \
+gcloud compute instances describe sigstore-oauth2 \
   --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 ```
 
 If you're using GCP as the DNS provider this can be done as follows
 
 ```bash
-$ gcloud dns record-sets create oauth2.example.com. \
+gcloud dns record-sets create oauth2.example.com. \
   --rrdatas=$(gcloud compute instances describe sigstore-oauth2 --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 ```
@@ -78,5 +78,3 @@ $ gcloud dns record-sets create oauth2.example.com. \
 
 > 📝 We do not need a domain for the certificate transparency log. This only
  communicate over a private network to Fulcio.
-
-Next: [Rekor](04-rekor.md)
