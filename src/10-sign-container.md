@@ -7,7 +7,7 @@ But before we do that, we need to use our own TUF public key file, you might rem
 Have this file locally and set it as an environment variable
 
 ```bash
-$ export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE="/path/to/ctfe_public.pem"
+export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE="/path/to/ctfe_public.pem"
 ```
 
 ```bash
@@ -22,7 +22,7 @@ COSIGN_EXPERIMENTAL=1 cosign sign --oidc-issuer "https://oauth2.example.com/auth
 An example run:
 
 ```bash
-$ COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 Generating ephemeral keys...
 Retrieving signed certificate...
 Your browser will now be opened to:
@@ -41,19 +41,19 @@ Grab your `fulcio-root.pem` cerficate you generated on the fulcio server (and al
 Set the following environment variable:
 
 ```bash
-$ export SIGSTORE_ROOT_FILE="$HOME/fulcio-root.pem"
+export SIGSTORE_ROOT_FILE="$HOME/fulcio-root.pem"
 ```
 
 We can now verify
 
 ```bash
-$ COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
 ```
 
 An example:
 
 ```bash
-$ COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 
 Verification for ghcr.io/lukehinds/sigstore-thw:latest --
 The following checks were performed on each of these signatures:

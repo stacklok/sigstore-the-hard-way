@@ -9,5 +9,5 @@ jobs:
             - name: "Run Markdown linter"
               uses: docker://avtodev/markdown-lint:v1
               with:
-                  args: docs/*.md
+                  args: src/*.md
                 

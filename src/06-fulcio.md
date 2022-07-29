@@ -11,7 +11,7 @@ we can use a SoftHSM or Google Certificate Authority service.
 SSH into the Fulcio Compute instance
 
 ```bash
-$ gcloud compute ssh sigstore-fulcio
+gcloud compute ssh sigstore-fulcio
 ```
 
 ## Dependencies
@@ -21,19 +21,19 @@ We need a few dependencies installed
 Update your system
 
 ```bash
-$ sudo apt-get update -y
+sudo apt-get update -y
 ```
 
 If you want to save up some time, remove man-db first
 
 ```bash
-$ sudo apt-get remove -y --purge man-db
+sudo apt-get remove -y --purge man-db
 ```
 
 Grab the following packages
 
 ```bash
-$ sudo apt-get install git gcc haproxy softhsm certbot opensc -y
+sudo apt-get install git gcc haproxy softhsm certbot opensc -y
 ```
 
 > 📝 If you plan to use GCP Certificate Service, you can drop SoftHSM and opensc
@@ -43,15 +43,15 @@ $ sudo apt-get install git gcc haproxy softhsm certbot opensc -y
 Download and run the golang installer (system package is not yet 1.16)
 
 ```bash
-$ curl -O https://storage.googleapis.com/golang/getgo/installer_linux
+curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 ```
 
 ```bash
-$ chmod +x installer_linux
+chmod +x installer_linux
 ```
 
 ```bash
-$ ./installer_linux
+./installer_linux
 ```
 
 e.g.
@@ -72,19 +72,19 @@ new shell prompt.
 As suggested run
 
 ```bash
-$ source /home/$USER/.bash_profile
-$ go version
+source /home/$USER/.bash_profile
+go version
 go version go1.17.1 linux/amd64
 ```
 
 ### Install Fulcio
 
 ```bash
-$ go install github.com/sigstore/fulcio@v0.5.2
+go install github.com/sigstore/fulcio@v0.5.2
 ```
 
 ```bash
-$ sudo mv ~/go/bin/fulcio /usr/local/bin/
+sudo mv ~/go/bin/fulcio /usr/local/bin/
 ```
 
 ### Let's encrypt (TLS) & HA Proxy config
@@ -100,7 +100,7 @@ IP="10.240.0.11"
 Let's now run certbot to obtain our TLS certs.
 
 ```bash
-$ sudo certbot certonly --standalone --preferred-challenges http \
+sudo certbot certonly --standalone --preferred-challenges http \
       --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
       --non-interactive --agree-tos --email youremail@domain.com
 ```
@@ -108,7 +108,7 @@ $ sudo certbot certonly --standalone --preferred-challenges http \
 Move the PEM chain into place
 
 ```bash
-$ sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
+sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
     "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" \
     | sudo tee "/etc/ssl/private/${DOMAIN}.pem" > /dev/null
 ```
@@ -118,7 +118,7 @@ Now we need to change certbot configuration for automatic renewal
 Prepare post renewal script
 
 ```bash
-$ cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 #!/bin/bash
 
 DOMAIN="fulcio.example.com"
@@ -133,13 +133,13 @@ systemctl reload haproxy.service
 Make sure the script has executable flag set
 
 ```bash
-$ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
 Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
 
 ```bash
-$ ls -l /etc/letsencrypt/renewal/fulcio.example.com.conf
+ls -l /etc/letsencrypt/renewal/fulcio.example.com.conf
 ```
 
 ```
@@ -156,7 +156,7 @@ post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 Prepare haproxy configuration
 
 ```bash
-$ cat > haproxy.cfg <<EOF
+cat > haproxy.cfg <<EOF
 defaults
     timeout connect 10s
     timeout client 30s
@@ -193,13 +193,13 @@ Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 If so, move it into place
 
 ```bash
-$ sudo mv haproxy.cfg /etc/haproxy/
+sudo mv haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax
 
 ```bash
-$ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
+sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 ```
 
 ### Start HAProxy
@@ -207,15 +207,15 @@ $ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 Let's now start HAProxy
 
 ```bash
-$ sudo systemctl enable haproxy.service
+sudo systemctl enable haproxy.service
 
 Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ```
 
 ```bash
-$ sudo systemctl restart haproxy.service
-$ sudo systemctl status haproxy.service
+sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -235,7 +235,7 @@ Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 Test automatic renewal
 
 ```bash
-$ sudo certbot renew --dry-run
+sudo certbot renew --dry-run
 ```
 
 # File CA setup
@@ -243,11 +243,11 @@ $ sudo certbot renew --dry-run
 First we need to generate some keys and a root CA
 
 ```bash
-$ openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-$ openssl ec -in unenc.key -out file_ca_key.pem -des
-$ openssl ec -in file_ca_key.pem -pubout -out file_ca_pub.pem
-$ openssl req -new -x509 -days 365 -extensions v3_ca -key file_ca_key.pem -out fulcio-root.pem
-$ rm unenc.key
+openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
+openssl ec -in unenc.key -out file_ca_key.pem -des
+openssl ec -in file_ca_key.pem -pubout -out file_ca_pub.pem
+openssl req -new -x509 -days 365 -extensions v3_ca -key file_ca_key.pem -out fulcio-root.pem
+rm unenc.key
 ```
 
 Copy all of the above key artifacts into `$HOME/fulcio-config/config`
@@ -261,12 +261,12 @@ Copy all of the above key artifacts into `$HOME/fulcio-config/config`
   in `/etc/softhsm/softhsm2.conf` configuration file, below we will define a custom configuration for fulcio.
 
 ```bash
-$ mkdir -p $HOME/fulcio-config/config
-$ mkdir $HOME/fulcio-config/tokens
+mkdir -p $HOME/fulcio-config/config
+mkdir $HOME/fulcio-config/tokens
 ```
 
 ```bash
-$ cat <<EOF | tee $HOME/fulcio-config/config/softhsm2.cfg > /dev/null
+cat <<EOF | tee $HOME/fulcio-config/config/softhsm2.cfg > /dev/null
 directories.tokendir = $HOME/fulcio-config/tokens
 objectstore.backend = file
 log.level = INFO
@@ -275,27 +275,27 @@ EOF
 ```
 
 ```bash
-$ export SOFTHSM2_CONF="$HOME/fulcio-config/config/softhsm2.cfg"
+export SOFTHSM2_CONF="$HOME/fulcio-config/config/softhsm2.cfg"
 ```
 
 ```bash
-$ echo 'export SOFTHSM2_CONF="$HOME/fulcio-config/config/softhsm2.cfg"' >> ~/.bash_profile
+echo 'export SOFTHSM2_CONF="$HOME/fulcio-config/config/softhsm2.cfg"' >> ~/.bash_profile
 ```
 
 ```bash
-$ softhsm2-util --init-token --slot 0 --label fulcio --pin 2324 --so-pin 2324
+softhsm2-util --init-token --slot 0 --label fulcio --pin 2324 --so-pin 2324
 ```
 
 Tokens will now be generated in `fulcio-config\tokens`
 
 ```bash
-$ ls -la $HOME/fulcio-config/tokens
+ls -la $HOME/fulcio-config/tokens
 ```
 
 For example:
 
 ```bash
-$ softhsm2-util --init-token --slot 0 --label fulcio
+softhsm2-util --init-token --slot 0 --label fulcio
 === SO PIN (4-255 characters) ===
 Please enter SO PIN: ****
 Please reenter SO PIN: ****
@@ -312,7 +312,7 @@ The token has been initialized and is reassigned to slot 1773686385
 Lets create a SoftHSM config for Fulcio
 
 ```bash
-$ cat <<EOF | tee $HOME/fulcio-config/config/crypto11.conf > /dev/null
+cat <<EOF | tee $HOME/fulcio-config/config/crypto11.conf > /dev/null
 {
   "Path" : "/usr/lib/softhsm/libsofthsm2.so",
   "TokenLabel": "fulcio",
@@ -327,13 +327,13 @@ EOF
 Now let's create a private key within the HSM
 
 ```bash
-$ pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
+pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
 ```
 
 For example:
 
 ```bash
-$ pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
+pkcs11-tool --module /usr/lib/softhsm/libsofthsm2.so --login --login-type user --keypairgen --id 1 --label PKCS11CA --key-type EC:secp384r1
 Using slot 0 with a present token (0x69b84e71)
 Logging in to "fulcio".
 Please enter User PIN:
@@ -355,15 +355,15 @@ Access:     local
 Now its time to create a Root CA using our newly minted private key:
 
 ```bash
-$ cd $HOME/fulcio-config/
-$ fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
+cd $HOME/fulcio-config/
+fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
 ```
 
 An example
 
 ```bash
-$ cd $HOME/fulcio-config/
-$ fulcio createca --org=acme --country=USA --locality=Anytown --province=AnyPlace --postal-code=ABCDEF --street-address=123 Main St --hsm-caroot-id 1 --out fulcio-root.pem
+cd $HOME/fulcio-config/
+fulcio createca --org=acme --country=USA --locality=Anytown --province=AnyPlace --postal-code=ABCDEF --street-address=123 Main St --hsm-caroot-id 1 --out fulcio-root.pem
 2021-10-01T18:09:16.284Z        INFO    app/createca.go:48      binding to PKCS11 HSM
 2021-10-01T18:09:16.289Z        INFO    app/createca.go:68      finding slot for private key: PKCS11CA
 2021-10-01T18:09:16.304Z        INFO    app/createca.go:108     Root CA:
@@ -389,7 +389,7 @@ OPl9CeCgaJqQRXlMSw8uf3nO0rYXTGCF
 Check Root CA key usage
 
 ```bash
-$ openssl x509 -in fulcio-root.pem -noout -ext extendedKeyUsage,keyUsage
+openssl x509 -in fulcio-root.pem -noout -ext extendedKeyUsage,keyUsage
 X509v3 Key Usage: critical
     Certificate Sign, CRL Sign
 ```
@@ -397,7 +397,7 @@ X509v3 Key Usage: critical
 Transfer the root certificate over to the certificate transparency log (or copy / paste into a text file for later).
 
 ```bash
-$ gcloud compute scp fulcio-root.pem <google_account_name>@sigstore-ctl:~/
+gcloud compute scp fulcio-root.pem <google_account_name>@sigstore-ctl:~/
 ```
 
 # Google Certificate Authority Service
@@ -447,7 +447,7 @@ OAUTH2_DOMAIN="oauth2.example.com"
 ```
 
 ```bash
-$ cat > $HOME/fulcio-config/config.json <<EOF
+cat > $HOME/fulcio-config/config.json <<EOF
 {
   "OIDCIssuers": {
     "https://accounts.google.com": {
@@ -473,7 +473,7 @@ EOF
 Inspect `config.json` and if everything looks in order, copy it into place
 
 ```bash
-$ mv config.json $HOME/fulcio-config/
+mv config.json $HOME/fulcio-config/
 ```
 
 # Start FulcioCA
@@ -484,7 +484,7 @@ Authority system choice.
 In both cases you may create a bare minimal systemd service
 
 ```bash
-$ cat /etc/systemd/system/fulcio.service
+cat /etc/systemd/system/fulcio.service
 [Unit]
 Description=fulcio
 After=network-online.target
@@ -504,10 +504,10 @@ WantedBy=multi-user.target
 ```
 
 ```bash
-$ sudo systemctl daemon-reload
-$ sudo systemctl enable fulcio.service
-$ sudo systemctl start fulcio.service
-$ sudo systemctl status fulcio.service
+sudo systemctl daemon-reload
+sudo systemctl enable fulcio.service
+sudo systemctl start fulcio.service
+sudo systemctl status fulcio.service
 ```
 
 ## File CA
@@ -519,7 +519,7 @@ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-
 ## SoftHSM
 
 ```bash
-$ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-caroot-id=1 --pkcs11-config-path=$HOME/fulcio-config/config/crypto11.conf --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-caroot-id=1 --pkcs11-config-path=$HOME/fulcio-config/config/crypto11.conf --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 
@@ -529,7 +529,7 @@ $ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm
 ## Google Certificate Authority Service
 
 ```bash
-$ fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 > 📝 Your resource name is a long POSIX type path string, e.g. `projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx`
@@ -537,7 +537,6 @@ $ fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_
 For example
 
 ```
-$ fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
+fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
 ```
 
-Next: [Certificate Transparency](07-certifcate-transparency.md)

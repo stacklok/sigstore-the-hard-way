@@ -9,14 +9,14 @@ First, let's create an image. You can use the following `Dockerfile` or any exis
 you already have locally
 
 ```bash
-$ cat > Dockerfile <<EOF
+cat > Dockerfile <<EOF
 FROM alpine
 CMD ["echo", "Hello Sigstore!"]
 EOF
 ```
 
 ```bash
-$ docker build -t sigstore-thw:latest .
+docker build -t sigstore-thw:latest .
 ```
 
 ## gchr PAT code
@@ -27,7 +27,7 @@ Create a PAT (Personal Access Token) for your account, by following
 Once you have your PAT code, login to ghcr:
 
 ```bash
-$ export CR_PAT="YOUR_TOKEN" ; echo -n "$CR_PAT" | docker login ghcr.io -u <github_user> --password-stdin
+export CR_PAT="YOUR_TOKEN" ; echo -n "$CR_PAT" | docker login ghcr.io -u <github_user> --password-stdin
 ```
 
 ## Tag and push an image
@@ -35,23 +35,22 @@ $ export CR_PAT="YOUR_TOKEN" ; echo -n "$CR_PAT" | docker login ghcr.io -u <gith
 Now we can tag and push our image:
 
 ```bash
-$ docker tag SOURCE_IMAGE_NAME:VERSION ghcr.io/TARGET_OWNER/TARGET_IMAGE_NAME:VERSION
+docker tag SOURCE_IMAGE_NAME:VERSION ghcr.io/TARGET_OWNER/TARGET_IMAGE_NAME:VERSION
 ```
 
 Push re-tagged imaged to the container registry:
 
 ```bash
-$ docker push ghcr.io/OWNER/IMAGE_NAME:VERSION
+docker push ghcr.io/OWNER/IMAGE_NAME:VERSION
 ```
 
 Example:
 
 ```bash
-$ docker tag sigstore-thw:latest ghcr.io/lukehinds/sigstore-thw:latest
-$ docker push ghcr.io/lukehinds/sigstore-thw:latest
+docker tag sigstore-thw:latest ghcr.io/lukehinds/sigstore-thw:latest
+docker push ghcr.io/lukehinds/sigstore-thw:latest
 The push refers to repository [ghcr.io/lukehinds/sigstore-thw]
 cb381a32b229: Pushed
 latest: digest: sha256:568999d4aedd444465c442617666359ddcd4dc117b22375983d2576c3847c9ba size: 528
 ```
 
-Next: [Install cosign](09-cosign.md)

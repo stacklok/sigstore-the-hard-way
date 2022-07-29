@@ -7,23 +7,23 @@ CTL requires running instances of trillian's log server and signer
 Let's start by logging in
 
 ```bash
-$ gcloud compute ssh sigstore-ctl
+gcloud compute ssh sigstore-ctl
 ```
 
 ## Dependencies
 
 ```bash
-$ sudo apt-get update -y
+sudo apt-get update -y
 ```
 
 If you want to save up some time, remove man-db first
 
 ```bash
-$ sudo apt-get remove -y --purge man-db
+sudo apt-get remove -y --purge man-db
 ```
 
 ```bash
-$ sudo apt-get install mariadb-server git wget -y
+sudo apt-get install mariadb-server git wget -y
 ```
 
 ### Install latest golang compiler
@@ -31,15 +31,15 @@ $ sudo apt-get install mariadb-server git wget -y
 Download and run the golang installer (system package is not yet 1.16)
 
 ```bash
-$ curl -O https://storage.googleapis.com/golang/getgo/installer_linux
+curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 ```
 
 ```bash
-$ chmod +x installer_linux
+chmod +x installer_linux
 ```
 
 ```bash
-$ ./installer_linux
+./installer_linux
 ```
 
 e.g.
@@ -60,8 +60,8 @@ new shell prompt.
 As suggested run
 
 ```bash
-$ source /home/$USER/.bash_profile
-$ go version
+source /home/$USER/.bash_profile
+go version
 go version go1.17.1 linux/amd64
 ```
 
@@ -70,7 +70,7 @@ go version go1.17.1 linux/amd64
 Trillian requires a databbase, let's first run `mysql_secure_installation`
 
 ```bash
-$ sudo mysql_secure_installation
+sudo mysql_secure_installation
 
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
@@ -131,19 +131,19 @@ Thanks for using MariaDB!
 We can now import the database as we used for rekor
 
 ```bash
-$ wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/createdb.sh
+wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/createdb.sh
 ```
 
 ```bash
-$ wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/storage.sql
+wget https://raw.githubusercontent.com/sigstore/rekor/main/scripts/storage.sql
 ```
 
 ```bash
-$ chmod +x createdb.sh
+chmod +x createdb.sh
 ```
 
 ```bash
-$ sudo ./createdb.sh
+sudo ./createdb.sh
 ```
 
 E.g.
@@ -157,27 +157,27 @@ Loading table data..
 ### Install trillian components
 
 ```bash
-$ go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
 ```
 
 ```bash
-$ sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
 ```bash
-$ go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
 ```
 
 ```bash
-$ sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
 ```
 
 ```bash
-$ go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
 ```
 
 ```bash
-$ sudo mv ~/go/bin/createtree /usr/local/bin/
+sudo mv ~/go/bin/createtree /usr/local/bin/
 ```
 
 ### Run trillian
@@ -185,17 +185,17 @@ $ sudo mv ~/go/bin/createtree /usr/local/bin/
 The following is best run in two terminals which are then left open (this helps for debugging)
 
 ```bash
-$ trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
+trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
 ```
 
 ```bash
-$ trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
+trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
 ```
 
 Alternatively, create bare minimal systemd services
 
 ```bash
-$ cat /etc/systemd/system/trillian_log_server.service
+cat /etc/systemd/system/trillian_log_server.service
 [Unit]
 Description=trillian_log_server
 After=network-online.target
@@ -213,7 +213,7 @@ WantedBy=multi-user.target
 ```
 
 ```bash
-$ cat /etc/systemd/system/trillian_log_signer.service
+cat /etc/systemd/system/trillian_log_signer.service
 [Unit]
 Description=trillian_log_signer
 After=network-online.target
@@ -233,24 +233,24 @@ WantedBy=multi-user.target
 Enable systemd services
 
 ```bash
-$ sudo systemctl daemon-reload
+sudo systemctl daemon-reload
 ```
 
 ```bash
-$ sudo systemctl enable trillian_log_server.service
+sudo systemctl enable trillian_log_server.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-$ sudo systemctl start trillian_log_server.service
-$ sudo systemctl status trillian_log_server.service
+sudo systemctl start trillian_log_server.service
+sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
 ```
 
 ```bash
-$ sudo systemctl enable trillian_log_signer.service
+sudo systemctl enable trillian_log_signer.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-$ sudo systemctl start trillian_log_signer.service
-$ sudo systemctl status trillian_log_signer.service
+sudo systemctl start trillian_log_signer.service
+sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -259,11 +259,11 @@ $ sudo systemctl status trillian_log_signer.service
 ### Install CTFE server
 
 ```bash
-$ go install github.com/google/certificate-transparency-go/trillian/ctfe/ct_server@latest
+go install github.com/google/certificate-transparency-go/trillian/ctfe/ct_server@latest
 ```
 
 ```bash
-$ sudo mv ~/go/bin/ct_server /usr/local/bin/
+sudo mv ~/go/bin/ct_server /usr/local/bin/
 ```
 
 ### Create a private key
@@ -273,11 +273,11 @@ $ sudo mv ~/go/bin/ct_server /usr/local/bin/
 > If you do care, place them into a more secure location and chmod to a secure level of file permissions.
 
 ```bash
-$ openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-$ openssl ec -in unenc.key -out privkey.pem -des
-$ openssl ec -in privkey.pem -pubout -out ctfe_public.pem
+openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
+openssl ec -in unenc.key -out privkey.pem -des
+openssl ec -in privkey.pem -pubout -out ctfe_public.pem
 ```
-$ rm unenc.key
+rm unenc.key
 ```
 > **Note**
 > The private key needs a passphrase, remember it as you will need it for `your_passphrase` when we create the `ct.cfg` further down.
@@ -297,7 +297,7 @@ LOG_ID="$(createtree --admin_server localhost:8091)"
 ### Set up the config file
 
 ```bash
-$ cat > ct.cfg <<EOF
+cat > ct.cfg <<EOF
 config {
   log_id: ${LOG_ID}
   prefix: "sigstore"
@@ -321,16 +321,16 @@ when generating the private key.
 
 
 ```bash
-$ sudo mkdir -p /etc/ctfe-config/
-$ sudo mv ct.cfg /etc/ctfe-config/
-$ sudo mv fulcio-root.pem /etc/ctfe-config/
-$ sudo mv privkey.pem /etc/ctfe-config/
+sudo mkdir -p /etc/ctfe-config/
+sudo mv ct.cfg /etc/ctfe-config/
+sudo mv fulcio-root.pem /etc/ctfe-config/
+sudo mv privkey.pem /etc/ctfe-config/
 ```
 
 ### Start the CT log
 
 ```bash
-$ ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
+ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
 ```
 
 > 📝 The `-http_endpoint` flag uses the internal private IP. We don't need this facing externally
@@ -339,7 +339,7 @@ $ ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server loc
 You may create a bare minimal systemd service
 
 ```bash
-$ cat /etc/systemd/system/ct_server.service
+cat /etc/systemd/system/ct_server.service
 [Unit]
 Description=ct_server
 After=network-online.target
@@ -357,10 +357,9 @@ WantedBy=multi-user.target
 ```
 
 ```bash
-$ sudo systemctl daemon-reload
-$ sudo systemctl enable ct_server.service
-$ sudo systemctl start ct_server.service
-$ sudo systemctl status ct_server.service
+sudo systemctl daemon-reload
+sudo systemctl enable ct_server.service
+sudo systemctl start ct_server.service
+sudo systemctl status ct_server.service
 ```
 
-Next: [Configure Registry](08-configure-registry.md)

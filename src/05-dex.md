@@ -11,23 +11,23 @@ certificates
 Connect to the compute instance
 
 ```bash
-$ gcloud compute ssh sigstore-oauth2
+gcloud compute ssh sigstore-oauth2
 ```
 
 ## Dependencies
 
 ```bash
-$ sudo apt-get update -y
+sudo apt-get update -y
 ```
 
 If you want to save up some time, remove man-db first
 
 ```bash
-$ sudo apt-get remove -y --purge man-db
+sudo apt-get remove -y --purge man-db
 ```
 
 ```bash
-$ sudo apt-get install haproxy make git gcc certbot -y
+sudo apt-get install haproxy make git gcc certbot -y
 ```
 
 ### Install latest golang compiler
@@ -35,15 +35,15 @@ $ sudo apt-get install haproxy make git gcc certbot -y
 Download and run the golang installer (system package is not yet 1.16)
 
 ```bash
-$ curl -O https://storage.googleapis.com/golang/getgo/installer_linux
+curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 ```
 
 ```bash
-$ chmod +x installer_linux
+chmod +x installer_linux
 ```
 
 ```bash
-$ ./installer_linux
+./installer_linux
 ```
 
 e.g.
@@ -64,8 +64,8 @@ new shell prompt.
 As suggested run
 
 ```bash
-$ source /home/$USER/.bash_profile
-$ go version
+source /home/$USER/.bash_profile
+go version
 go version go1.17.1 linux/amd64
 ```
 
@@ -82,7 +82,7 @@ IP="10.240.0.12"
 Let's now run certbot to obtain our TLS certs.
 
 ```bash
-$ sudo certbot certonly --standalone --preferred-challenges http \
+sudo certbot certonly --standalone --preferred-challenges http \
       --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
       --non-interactive --agree-tos --email youremail@domain.com
 ```
@@ -90,7 +90,7 @@ $ sudo certbot certonly --standalone --preferred-challenges http \
 Move the PEM chain into place
 
 ```bash
-$ sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
+sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
     "/etc/letsencrypt/live/${DOMAIN}/privkey.pem" \
     | sudo tee "/etc/ssl/private/${DOMAIN}.pem" > /dev/null
 ```
@@ -100,7 +100,7 @@ Now we need to change certbot configuration for automatic renewal
 Prepare post renewal script
 
 ```bash
-$ cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 #!/bin/bash
 
 DOMAIN="oauth2.example.com"
@@ -115,13 +115,13 @@ systemctl reload haproxy.service
 Make sure the script has executable flag set
 
 ```bash
-$ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
 Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
 
 ```bash
-$ ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
+ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
 ```
 
 ```
@@ -138,7 +138,7 @@ post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 Prepare haproxy configuration
 
 ```bash
-$ cat > haproxy.cfg <<EOF
+cat > haproxy.cfg <<EOF
 defaults
     timeout connect 10s
     timeout client 30s
@@ -175,13 +175,13 @@ Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 If so, move it into place
 
 ```bash
-$ sudo mv haproxy.cfg /etc/haproxy/
+sudo mv haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax
 
 ```bash
-$ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
+sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 ```
 
 ### Start HAProxy
@@ -189,15 +189,15 @@ $ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 Let's now start HAProxy
 
 ```bash
-$ sudo systemctl enable haproxy.service
+sudo systemctl enable haproxy.service
 
 Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ```
 
 ```bash
-$ sudo systemctl restart haproxy.service
-$ sudo systemctl status haproxy.service
+sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -217,20 +217,20 @@ Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 Test automatic renewal
 
 ```bash
-$ sudo certbot renew --dry-run
+sudo certbot renew --dry-run
 ```
 
 ### Install Dex
 
 ```bash
-$ mkdir -p ~/go/src/github.com/dexidp/ && cd "$_"
-$ git clone https://github.com/dexidp/dex.git
+mkdir -p ~/go/src/github.com/dexidp/ && cd "$_"
+git clone https://github.com/dexidp/dex.git
 ```
 
 ```bash
-$ cd dex
-$ make build
-$ sudo mv bin/dex /usr/local/bin/
+cd dex
+make build
+sudo mv bin/dex /usr/local/bin/
 ```
 
 ### Obtain Google OAUTH credentials
@@ -286,7 +286,7 @@ GOOGLE_CLIENT_SECRET="..."
 ```
 
 ```bash
-$ cat > dex-config.yaml <<EOF
+cat > dex-config.yaml <<EOF
 issuer: https://${DOMAIN}/auth
 
 storage:
@@ -350,21 +350,21 @@ EOF
 Move configuration file
 
 ```bash
-$ sudo mkdir -p /var/dex/
-$ sudo mkdir -p /etc/dex/
-$ sudo mv dex-config.yaml /etc/dex/
+sudo mkdir -p /var/dex/
+sudo mkdir -p /etc/dex/
+sudo mv dex-config.yaml /etc/dex/
 ```
 
 ### Start dex
 
 ```bash
-$ dex serve --web-http-addr=0.0.0.0:6000  dex-config.yaml
+dex serve --web-http-addr=0.0.0.0:6000  dex-config.yaml
 ```
 
 You may create a bare minimal systemd service for dex
 
 ```bash
-$ cat /etc/systemd/system/dex.service
+cat /etc/systemd/system/dex.service
 [Unit]
 Description=dex
 After=network-online.target
@@ -382,10 +382,9 @@ WantedBy=multi-user.target
 ```
 
 ```bash
-$ sudo systemctl daemon-reload
-$ sudo systemctl enable dex.service
-$ sudo systemctl start dex.service
-$ sudo systemctl status dex.service
+sudo systemctl daemon-reload
+sudo systemctl enable dex.service
+sudo systemctl start dex.service
+sudo systemctl status dex.service
 ```
 
-Next: [Fulcio](06-fulcio.md)
