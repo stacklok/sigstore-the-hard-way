@@ -337,29 +337,33 @@ sudo systemctl status trillian_log_signer.service
 The following section dumps out keys into the home directory. This is only recommended if you do not greatly care about the security of this machine
 If you do care, place them into a more secure location and chmod to a secure level of file permissions.</p>
 </blockquote>
+<p>Create a key pair with the following command:</p>
 <pre><code class="language-bash">openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
 openssl ec -in unenc.key -out privkey.pem -des
-openssl ec -in privkey.pem -pubout -out ctfe_public.pem
 </code></pre>
-<p>rm unenc.key</p>
-<pre><code>&gt; **Note**
-&gt; The private key needs a passphrase, remember it as you will need it for `your_passphrase` when we create the `ct.cfg` further down.
-
-&gt; **Note**
-&gt; You will need the ctfe_public.pem file for the TUF root of cosign, with the sign-container section towards the end
-
-### Create a Tree ID
-
-&gt; **Note**
-&gt; `trillian_log_server` needs to be running for this command to execute
-
+<p>Extract the public key from the key-pair:</p>
+<pre><code class="language-bash">openssl ec -in privkey.pem -pubout -out ctfe_public.pem
 </code></pre>
-<p>LOG_ID=&quot;$(createtree --admin_server localhost:8091)&quot;</p>
-<pre><code>
-### Set up the config file
-
-```bash
-cat &gt; ct.cfg &lt;&lt;EOF
+<p>Feel free to remove the unencrypted key:</p>
+<pre><code class="language-bash">rm unenc.key
+</code></pre>
+<blockquote>
+<p><strong>Note</strong>
+The private key needs a passphrase, remember it as you will need it for <code>your_passphrase</code> when we create the <code>ct.cfg</code> further down.</p>
+</blockquote>
+<blockquote>
+<p><strong>Note</strong>
+You will need the ctfe_public.pem file for the TUF root of cosign, with the sign-container section towards the end</p>
+</blockquote>
+<h3 id="create-a-tree-id"><a class="header" href="#create-a-tree-id">Create a Tree ID</a></h3>
+<blockquote>
+<p><strong>Note</strong>
+<code>trillian_log_server</code> needs to be running for this command to execute</p>
+</blockquote>
+<pre><code class="language-bash">LOG_ID=&quot;$(createtree --admin_server localhost:8091)&quot;
+</code></pre>
+<h3 id="set-up-the-config-file"><a class="header" href="#set-up-the-config-file">Set up the config file</a></h3>
+<pre><code class="language-bash">cat &gt; ct.cfg &lt;&lt;EOF
 config {
   log_id: ${LOG_ID}
   prefix: &quot;sigstore&quot;
