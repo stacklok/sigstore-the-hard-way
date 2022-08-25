@@ -8,6 +8,14 @@ Now that are instances are running, lets grab the external IP's and set up domai
 
 ## Configuration
 
+Export a variable that will point to the domain you just bought. In this example we'll be using `example.com`:
+
+```bash
+export DOMAIN="example.com"
+```
+
+We'll be using this variable throughout the following code-snippets.
+
 ### rekor.example.com
 
 Grab your external / public IP
@@ -28,7 +36,7 @@ To create resource records on Google,
 If you're using GCP as the DNS provider this can be done as follows
 
 ```bash
-gcloud dns record-sets create rekor.example.com. \
+gcloud dns record-sets create rekor.$DOMAIN. \
   --rrdatas=$(gcloud compute instances describe sigstore-rekor --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 ```
@@ -49,7 +57,7 @@ gcloud compute instances describe sigstore-fulcio \
 If you're using GCP as the DNS provider this can be done as follows
 
 ```bash
-gcloud dns record-sets create fulcio.example.com. \
+gcloud dns record-sets create fulcio.$DOMAIN. \
   --rrdatas=$(gcloud compute instances describe sigstore-fulcio --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 ```
@@ -68,7 +76,7 @@ gcloud compute instances describe sigstore-oauth2 \
 If you're using GCP as the DNS provider this can be done as follows
 
 ```bash
-gcloud dns record-sets create oauth2.example.com. \
+gcloud dns record-sets create oauth2.$DOMAIN. \
   --rrdatas=$(gcloud compute instances describe sigstore-oauth2 --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 ```
