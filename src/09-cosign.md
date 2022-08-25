@@ -5,7 +5,7 @@ be run on a machine local to you (such as your laptop or PC), and outside of the
 
 ## Install cosign
 
-Head the [releases page for cosign v1.0](https://github.com/sigstore/cosign/releases/tag/v1.2.1)
+Head the [releases page for cosign v1.0](https://github.com/sigstore/cosign/releases/tag/v1.11.1)
 and download a release specific to your hardware (MacOS, Linux, Windows)
 
 Also download the cosign public key, signature for your architecture.
@@ -20,7 +20,7 @@ Verify the signing.
 Download required files
 
 ```bash
-curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.2.1/{cosign-linux-amd64,release-cosign.pub,cosign-linux-amd64.sig}
+curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.11.1/{cosign-linux-amd64,release-cosign.pub,cosign-linux-amd64.sig}
 ```
 
 Verify signature
@@ -48,7 +48,7 @@ sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 Download required files
 
 ```bash
-curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.2.1/{cosign-darwin-amd64,release-cosign.pub,cosign-darwin-amd64.sig}
+curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.11.1/{cosign-darwin-amd64,release-cosign.pub,cosign-darwin-amd64.sig}
 ```
 
 Verify signature
