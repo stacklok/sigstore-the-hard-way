@@ -291,8 +291,9 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 </code></pre>
 <p>Verify all compute instances are in a <code>RUNNING</code> state.</p>
 <pre><code class="language-bash">gcloud compute instances list --filter=&quot;tags.items=sigstore-the-hard-way-proj&quot;
-
-NAME             ZONE            MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
+</code></pre>
+<p>The output should be as follows:</p>
+<pre><code class="language-bash">NAME             ZONE            MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
 sigstore-ctl     europe-west1-c  e2-small                   10.240.0.13  35.241.198.188  RUNNING
 sigstore-fulcio  europe-west1-c  e2-small                   10.240.0.11  35.241.201.91   RUNNING
 sigstore-oauth2  europe-west1-c  e2-small                   10.240.0.12  35.240.60.139   RUNNING
