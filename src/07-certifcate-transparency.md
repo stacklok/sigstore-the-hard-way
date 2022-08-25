@@ -272,15 +272,25 @@ sudo mv ~/go/bin/ct_server /usr/local/bin/
 > The following section dumps out keys into the home directory. This is only recommended if you do not greatly care about the security of this machine
 > If you do care, place them into a more secure location and chmod to a secure level of file permissions.
 
+Create a key pair with the following command:
+
 ```bash
 openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
 openssl ec -in unenc.key -out privkey.pem -des
+```
+
+Extract the public key from the key-pair:
+
+```bash
 openssl ec -in privkey.pem -pubout -out ctfe_public.pem
 ```
 
-rm unenc.key
+Feel free to remove the unencrypted key:
 
+```bash
+rm unenc.key
 ```
+
 > **Note**
 > The private key needs a passphrase, remember it as you will need it for `your_passphrase` when we create the `ct.cfg` further down.
 
@@ -292,10 +302,8 @@ rm unenc.key
 > **Note**
 > `trillian_log_server` needs to be running for this command to execute
 
-```
-
+```bash
 LOG_ID="$(createtree --admin_server localhost:8091)"
-
 ```
 
 ### Set up the config file
