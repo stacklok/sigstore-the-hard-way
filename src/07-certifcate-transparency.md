@@ -39,14 +39,14 @@ chmod +x installer_linux
 ```
 
 ```bash
-./installer_linux
+./installer_linux -version 1.17.13
 ```
 
 e.g.
 
 ```
 Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.17.13 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -62,6 +62,11 @@ As suggested run
 ```bash
 source /home/$USER/.bash_profile
 go version
+```
+
+The output should be as follows:
+
+```bash
 go version go1.17.1 linux/amd64
 ```
 
