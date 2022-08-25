@@ -35,11 +35,14 @@ gcloud compute firewall-rules create sigstore-the-hard-way-allow-external \
     --source-ranges 0.0.0.0/0
 ```
 
-Verify the rules were created
+To verify the rules were created run the following command:
 
 ```bash
 gcloud compute firewall-rules list --filter="network:sigstore-the-hard-way-proj"
+```
 
+You should see an output similar to the following:
+```bash
 NAME                                       NETWORK                     DIRECTION  PRIORITY  ALLOW                       DENY  DISABLED
 sigstore-the-hard-way-allow-external       sigstore-the-hard-way-proj  INGRESS    1000      tcp:22,tcp:80,tcp:443,icmp        False
 sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS    1000      tcp,udp,icmp                      False
