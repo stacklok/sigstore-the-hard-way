@@ -9,5 +9,6 @@ shout-out to them!
 - Axel Simon ([axelsimon](https://github.com/axelsimon))
 - Steve Morgan ([rebelopsio](https://github.com/rebelopsio))
 - [mc-slava](https://github.com/mc-slava)
+- [Juan Antonio Osorio](https://github.com/JAORMX)
 
 If you feel you're missing from this list, feel free to add yourself in a PR.
