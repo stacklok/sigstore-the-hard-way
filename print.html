@@ -235,10 +235,11 @@ to <a href="https://support.google.com/googleapi/answer/6158867?hl=en">enable bi
     --network sigstore-the-hard-way-proj \
     --source-ranges 0.0.0.0/0
 </code></pre>
-<p>Verify the rules were created</p>
+<p>To verify the rules were created run the following command:</p>
 <pre><code class="language-bash">gcloud compute firewall-rules list --filter=&quot;network:sigstore-the-hard-way-proj&quot;
-
-NAME                                       NETWORK                     DIRECTION  PRIORITY  ALLOW                       DENY  DISABLED
+</code></pre>
+<p>You should see an output similar to the following:</p>
+<pre><code class="language-bash">NAME                                       NETWORK                     DIRECTION  PRIORITY  ALLOW                       DENY  DISABLED
 sigstore-the-hard-way-allow-external       sigstore-the-hard-way-proj  INGRESS    1000      tcp:22,tcp:80,tcp:443,icmp        False
 sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS    1000      tcp,udp,icmp                      False
 </code></pre>
