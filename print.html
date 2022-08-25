@@ -307,6 +307,10 @@ and you should easily be able to get a domain
 for $1. There are also lots of other providers. Use whatever works for you.</p>
 </blockquote>
 <h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Export a variable that will point to the domain you just bought. In this example we'll be using <code>example.com</code>:</p>
+<pre><code class="language-bash">export DOMAIN=&quot;example.com&quot;
+</code></pre>
+<p>We'll be using this variable throughout the following code-snippets.</p>
 <h3 id="rekorexamplecom"><a class="header" href="#rekorexamplecom">rekor.example.com</a></h3>
 <p>Grab your external / public IP</p>
 <pre><code class="language-bash">gcloud compute instances describe sigstore-rekor \
@@ -320,7 +324,7 @@ for $1. There are also lots of other providers. Use whatever works for you.</p>
 <li>DNS &gt; Manage Custom Records</li>
 </ol>
 <p>If you're using GCP as the DNS provider this can be done as follows</p>
-<pre><code class="language-bash">gcloud dns record-sets create rekor.example.com. \
+<pre><code class="language-bash">gcloud dns record-sets create rekor.$DOMAIN. \
   --rrdatas=$(gcloud compute instances describe sigstore-rekor --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 </code></pre>
@@ -333,7 +337,7 @@ for $1. There are also lots of other providers. Use whatever works for you.</p>
   --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 </code></pre>
 <p>If you're using GCP as the DNS provider this can be done as follows</p>
-<pre><code class="language-bash">gcloud dns record-sets create fulcio.example.com. \
+<pre><code class="language-bash">gcloud dns record-sets create fulcio.$DOMAIN. \
   --rrdatas=$(gcloud compute instances describe sigstore-fulcio --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 </code></pre>
@@ -345,7 +349,7 @@ for $1. There are also lots of other providers. Use whatever works for you.</p>
   --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
 </code></pre>
 <p>If you're using GCP as the DNS provider this can be done as follows</p>
-<pre><code class="language-bash">gcloud dns record-sets create oauth2.example.com. \
+<pre><code class="language-bash">gcloud dns record-sets create oauth2.$DOMAIN. \
   --rrdatas=$(gcloud compute instances describe sigstore-oauth2 --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
   --type=A --ttl=60 --zone=example-com
 </code></pre>
