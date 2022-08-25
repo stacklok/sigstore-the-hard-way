@@ -108,7 +108,11 @@ Verify all compute instances are in a `RUNNING` state.
 
 ```bash
 gcloud compute instances list --filter="tags.items=sigstore-the-hard-way-proj"
+```
 
+The output should be as follows:
+
+```bash
 NAME             ZONE            MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
 sigstore-ctl     europe-west1-c  e2-small                   10.240.0.13  35.241.198.188  RUNNING
 sigstore-fulcio  europe-west1-c  e2-small                   10.240.0.11  35.241.201.91   RUNNING
