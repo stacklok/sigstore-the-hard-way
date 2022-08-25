@@ -22,7 +22,7 @@ COSIGN_EXPERIMENTAL=1 cosign sign --oidc-issuer "https://oauth2.example.com/auth
 An example run:
 
 ```bash
-COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 Generating ephemeral keys...
 Retrieving signed certificate...
 Your browser will now be opened to:
@@ -44,16 +44,28 @@ Set the following environment variable:
 export SIGSTORE_ROOT_FILE="$HOME/fulcio-root.pem"
 ```
 
+Download the Rekor public key:
+
+```bash
+wget -O publicKey.pem https://rekor.ozz-sigstore-instance.dev/api/v1/log/publicKey
+```
+
+Set it in the appropriate environment variable:
+
+```bash
+export SIGSTORE_REKOR_PUBLIC_KEY="$PWD/publicKey.pem"
+```
+
 We can now verify
 
 ```bash
-COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
 ```
 
 An example:
 
 ```bash
-COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 
 Verification for ghcr.io/lukehinds/sigstore-thw:latest --
 The following checks were performed on each of these signatures:
