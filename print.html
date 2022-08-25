@@ -1750,7 +1750,7 @@ sudo mv cosign-darwin-amd64 /usr/local/bin/cosign
 to reauthenticate with your PAT in GitHub Container Registry again, refer to <a href="08-configure-registry.html">Configure registry</a></p>
 </blockquote>
 <p>An example run:</p>
-<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign sign -oidc-issuer https://oauth2.decodebytes.sh/auth -fulcio-url https://fulcio.decodebytes.sh --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 Generating ephemeral keys...
 Retrieving signed certificate...
 Your browser will now be opened to:
@@ -1765,11 +1765,17 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 <p>Set the following environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_ROOT_FILE=&quot;$HOME/fulcio-root.pem&quot;
 </code></pre>
+<p>Download the Rekor public key:</p>
+<pre><code class="language-bash">wget -O publicKey.pem https://rekor.ozz-sigstore-instance.dev/api/v1/log/publicKey
+</code></pre>
+<p>Set it in the appropriate environment variable:</p>
+<pre><code class="language-bash">export SIGSTORE_REKOR_PUBLIC_KEY=&quot;$PWD/publicKey.pem&quot;
+</code></pre>
 <p>We can now verify</p>
-<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.example.com ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
+<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
 </code></pre>
 <p>An example:</p>
-<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify -rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
 
 Verification for ghcr.io/lukehinds/sigstore-thw:latest --
 The following checks were performed on each of these signatures:
