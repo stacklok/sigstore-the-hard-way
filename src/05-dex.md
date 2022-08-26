@@ -358,7 +358,7 @@ sudo mv dex-config.yaml /etc/dex/
 ### Start dex
 
 ```bash
-dex serve --web-http-addr=0.0.0.0:6000  dex-config.yaml
+dex serve --web-http-addr=0.0.0.0:6000  /etc/dex/dex-config.yaml
 ```
 
 You may create a bare minimal systemd service for dex
