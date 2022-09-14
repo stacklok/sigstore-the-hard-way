@@ -18,27 +18,29 @@ We'll be using this variable throughout the following code-snippets.
 
 ### rekor.example.com
 
-Grab your external / public IP
+Grab your external / public IP:
 
 ```bash
-gcloud compute instances describe sigstore-rekor \
-  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+Rekor_PIP=$(gcloud compute instances describe sigstore-rekor \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 ```
 
 You now want to make an "A Record" to a subdomain or "rekor" and to your external IP from the above command
 
-To create resource records on Google,
+To create resource records on Google:
 
 1. Go to [Google Domains](https://domains.google.com/)
 2. Click on your domain from the homepage
 3. DNS > Manage Custom Records
 
-If you're using GCP as the DNS provider this can be done as follows
+If you're using GCP as the DNS provider this can be done as follows:
 
 ```bash
+export ZONE="example-com"
+
 gcloud dns record-sets create rekor.$DOMAIN. \
-  --rrdatas=$(gcloud compute instances describe sigstore-rekor --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
-  --type=A --ttl=60 --zone=example-com
+  --rrdatas=$Rekor_PIP \
+  --type=A --ttl=60 --zone=$ZONE
 ```
 
 |Type|Host| Value|
@@ -47,19 +49,21 @@ gcloud dns record-sets create rekor.$DOMAIN. \
 
 ### fulcio.example.com
 
-Now repeat the same for fulcio, and dex
+Now repeat the same for fulcio, and dex:
 
 ```bash
-gcloud compute instances describe sigstore-fulcio \
-  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+Fulcio_PIP=$(gcloud compute instances describe sigstore-fulcio \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 ```
 
-If you're using GCP as the DNS provider this can be done as follows
+If you're using GCP as the DNS provider this can be done as follows:
 
 ```bash
+export ZONE="example-com"
+
 gcloud dns record-sets create fulcio.$DOMAIN. \
-  --rrdatas=$(gcloud compute instances describe sigstore-fulcio --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
-  --type=A --ttl=60 --zone=example-com
+  --rrdatas=$Fulcio_PIP \
+  --type=A --ttl=60 --zone=$ZONE
 ```
 
 |Type|Host| Value|
@@ -69,21 +73,27 @@ gcloud dns record-sets create fulcio.$DOMAIN. \
 ### oauth2.example.com
 
 ```bash
-gcloud compute instances describe sigstore-oauth2 \
-  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+oauth2_PIP=$(gcloud compute instances describe sigstore-oauth2 \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 ```
 
-If you're using GCP as the DNS provider this can be done as follows
+If you're using GCP as the DNS provider this can be done as follows:
 
 ```bash
 gcloud dns record-sets create oauth2.$DOMAIN. \
-  --rrdatas=$(gcloud compute instances describe sigstore-oauth2 --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
-  --type=A --ttl=60 --zone=example-com
+  --rrdatas=$oauth2_PIP \
+  --type=A --ttl=60 --zone=$ZONE
 ```
 
 |Type|Host| Value|
 |---|---|---|
 | A Record|oauth2|x.x.x.x|
+
+Check the records-sets generated during this process:
+
+```bash
+gcloud dns record-sets list --zone $ZONE
+```
 
 > 📝 We do not need a domain for the certificate transparency log. This only
  communicate over a private network to Fulcio.

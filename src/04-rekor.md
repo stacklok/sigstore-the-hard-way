@@ -5,7 +5,7 @@ Rekor is sigstores signature transparency log.
 Rekor requires running instances of trillian's log server and signer, with a database backend. A few different databases
 can be used by trillian, for this example we will use mariadb.
 
-Let's start by logging in
+Let's start by logging in:
 
 ```bash
 gcloud compute ssh sigstore-rekor
@@ -13,7 +13,7 @@ gcloud compute ssh sigstore-rekor
 
 ## Dependencies
 
-We need a few dependencies installed
+We need a few dependencies installed:
 
 Update your system
 
@@ -21,7 +21,7 @@ Update your system
 sudo apt-get update -y
 ```
 
-If you want to save up some time, remove man-db first
+If you want to save up some time, remove man-db first:
 
 ```bash
 sudo apt-get remove -y --purge man-db
@@ -38,7 +38,7 @@ sudo apt-get install mariadb-server git redis-server haproxy certbot -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16)
+Download and run the golang installer (system package is not yet 1.16):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -54,7 +54,7 @@ chmod +x installer_linux
 
 e.g.
 
-```
+```bash
 Welcome to the Go installer!
 Downloading Go version go1.17.1 to /home/luke/.go
 This may take a bit of time...
@@ -67,17 +67,18 @@ new environment variables to your current session, or open a
 new shell prompt.
 ```
 
-As suggested run
+As suggested run:
 
 ```bash
 source /home/$USER/.bash_profile
+
 go version
 go version go1.17.1 linux/amd64
 ```
 
 ### Install rekor
 
-We will work with the rekor repo (we grab the whole repo as we will need a some scripts)
+We will work with the rekor repo (we grab the whole repo as we will need a some scripts):
 
 ```bash
 mkdir -p ~/go/src/github.com/sigstore && cd "$_"
@@ -87,7 +88,7 @@ mkdir -p ~/go/src/github.com/sigstore && cd "$_"
 git clone https://github.com/sigstore/rekor.git && cd rekor/
 ```
 
-And let's install both the server and the CLI
+And let's install both the server and the CLI:
 
 ```bash
 go build -o rekor-cli ./cmd/rekor-cli
@@ -110,7 +111,7 @@ sudo mv rekor-server /usr/local/bin/
 Trillian requires a database, let's first run `mysql_secure_installation` to
 remove test accounts etc.
 
-```
+```bash
 sudo mysql_secure_installation
 
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
@@ -169,12 +170,12 @@ installation should now be secure.
 Thanks for using MariaDB!
 ```
 
-We can now build the database
+We can now build the database.
 
 Within the rekor repository is a `scripts/createdb.sh` script.
 
 Edit this script and populate the root password `ROOTPASS` you set for the system
-and then run the script (leave blank if not)
+and then run the script (leave blank if not):
 
 ```bash
 cd scripts/
@@ -252,7 +253,7 @@ RestartSec=5s
 WantedBy=multi-user.target
 ```
 
-Enable systemd services
+Enable systemd services:
 
 ```bash
 sudo systemctl daemon-reload
@@ -280,7 +281,7 @@ sudo systemctl status trillian_log_signer.service
 
 ### Start rekor
 
-Start rekor
+Start rekor:
 
 ```bash
 rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
@@ -288,7 +289,7 @@ rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=809
 
 Note: Rekor runs on port 3000 on all interfaces by default
 
-Alternatively, you may create a bare minimal systemd service similar to trillian above
+Alternatively, you may create a bare minimal systemd service similar to trillian above:
 
 ```bash
 cat /etc/systemd/system/rekor.service
@@ -318,7 +319,7 @@ sudo systemctl status rekor.service
 ### Let's encrypt (TLS) & HA Proxy config
 
 Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
-private IP address.
+private IP address:
 
 ```bash
 DOMAIN="rekor.example.com"
@@ -364,20 +365,20 @@ Make sure the script has executable flag set
 sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
-Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
+Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):
 
 ```bash
 ls -l /etc/letsencrypt/renewal/rekor.example.com.conf
 ```
 
-```
+```bash
 http01_port = 9080
 http01_address = 127.0.0.1
 ```
 
-Append new line
+Append new line:
 
-```
+```bash
 post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
@@ -477,7 +478,7 @@ rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_k
 
 Example:
 
-```
+```bash
 rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_key.key --signature tests/test_file.sig --rekor_server http://127.0.0.1:3000
 Created entry at index 0, available at: http://127.0.0.1:3000/api/v1/log/entries/b08416d417acdb0610d4a030d8f697f9d0a718024681a00fa0b9ba67072a38b5
 ```
