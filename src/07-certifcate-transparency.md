@@ -44,7 +44,7 @@ chmod +x installer_linux
 
 e.g.
 
-```
+```bash
 Welcome to the Go installer!
 Downloading Go version go1.17.1 to /home/luke/.go
 This may take a bit of time...
