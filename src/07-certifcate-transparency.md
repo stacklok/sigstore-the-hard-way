@@ -4,7 +4,7 @@ We will now install the Certificate transparency log (CTL).
 
 CTL requires running instances of trillian's log server and signer
 
-Let's start by logging in
+Let's start by logging in:
 
 ```bash
 gcloud compute ssh sigstore-ctl

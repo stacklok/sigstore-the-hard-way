@@ -2,9 +2,9 @@
 
 We are now ready to sign our container using our own sigstore infrastructure
 
-But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server
+But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server.
 
-Have this file locally and set it as an environment variable
+Have this file locally and set it as an environment variable:
 
 ```bash
 export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE="/path/to/ctfe_public.pem"
@@ -56,7 +56,7 @@ Set it in the appropriate environment variable:
 export SIGSTORE_REKOR_PUBLIC_KEY="$PWD/publicKey.pem"
 ```
 
-We can now verify
+We can now verify:
 
 ```bash
 COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
