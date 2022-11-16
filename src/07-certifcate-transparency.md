@@ -276,7 +276,7 @@ Create a key pair with the following command:
 
 ```bash
 openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-openssl ec -in unenc.key -out privkey.pem -des
+openssl ec -in unenc.key -out privkey.pem -des3
 ```
 
 Extract the public key from the key-pair:

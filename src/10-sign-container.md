@@ -47,7 +47,7 @@ export SIGSTORE_ROOT_FILE="$HOME/fulcio-root.pem"
 Download the Rekor public key:
 
 ```bash
-wget -O publicKey.pem https://rekor.ozz-sigstore-instance.dev/api/v1/log/publicKey
+wget -O publicKey.pem https://rekor.example.com/api/v1/log/publicKey
 ```
 
 Set it in the appropriate environment variable:
