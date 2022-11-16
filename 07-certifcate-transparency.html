@@ -339,7 +339,7 @@ If you do care, place them into a more secure location and chmod to a secure lev
 </blockquote>
 <p>Create a key pair with the following command:</p>
 <pre><code class="language-bash">openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-openssl ec -in unenc.key -out privkey.pem -des
+openssl ec -in unenc.key -out privkey.pem -des3
 </code></pre>
 <p>Extract the public key from the key-pair:</p>
 <pre><code class="language-bash">openssl ec -in privkey.pem -pubout -out ctfe_public.pem

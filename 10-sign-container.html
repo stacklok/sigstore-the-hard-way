@@ -175,7 +175,7 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 <pre><code class="language-bash">export SIGSTORE_ROOT_FILE=&quot;$HOME/fulcio-root.pem&quot;
 </code></pre>
 <p>Download the Rekor public key:</p>
-<pre><code class="language-bash">wget -O publicKey.pem https://rekor.ozz-sigstore-instance.dev/api/v1/log/publicKey
+<pre><code class="language-bash">wget -O publicKey.pem https://rekor.example.com/api/v1/log/publicKey
 </code></pre>
 <p>Set it in the appropriate environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_REKOR_PUBLIC_KEY=&quot;$PWD/publicKey.pem&quot;

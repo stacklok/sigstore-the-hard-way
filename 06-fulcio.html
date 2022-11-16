@@ -308,7 +308,7 @@ Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 <h1 id="file-ca-setup"><a class="header" href="#file-ca-setup">File CA setup</a></h1>
 <p>First we need to generate some keys and a root CA</p>
 <pre><code class="language-bash">openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-openssl ec -in unenc.key -out file_ca_key.pem -des
+openssl ec -in unenc.key -out file_ca_key.pem -des3
 openssl ec -in file_ca_key.pem -pubout -out file_ca_pub.pem
 openssl req -new -x509 -days 365 -extensions v3_ca -key file_ca_key.pem -out fulcio-root.pem
 rm unenc.key

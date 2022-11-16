@@ -1175,7 +1175,7 @@ Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 <h1 id="file-ca-setup"><a class="header" href="#file-ca-setup">File CA setup</a></h1>
 <p>First we need to generate some keys and a root CA</p>
 <pre><code class="language-bash">openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-openssl ec -in unenc.key -out file_ca_key.pem -des
+openssl ec -in unenc.key -out file_ca_key.pem -des3
 openssl ec -in file_ca_key.pem -pubout -out file_ca_pub.pem
 openssl req -new -x509 -days 365 -extensions v3_ca -key file_ca_key.pem -out fulcio-root.pem
 rm unenc.key
@@ -1600,7 +1600,7 @@ If you do care, place them into a more secure location and chmod to a secure lev
 </blockquote>
 <p>Create a key pair with the following command:</p>
 <pre><code class="language-bash">openssl ecparam -genkey -name prime256v1 -noout -out unenc.key
-openssl ec -in unenc.key -out privkey.pem -des
+openssl ec -in unenc.key -out privkey.pem -des3
 </code></pre>
 <p>Extract the public key from the key-pair:</p>
 <pre><code class="language-bash">openssl ec -in privkey.pem -pubout -out ctfe_public.pem
@@ -1786,7 +1786,7 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 <pre><code class="language-bash">export SIGSTORE_ROOT_FILE=&quot;$HOME/fulcio-root.pem&quot;
 </code></pre>
 <p>Download the Rekor public key:</p>
-<pre><code class="language-bash">wget -O publicKey.pem https://rekor.ozz-sigstore-instance.dev/api/v1/log/publicKey
+<pre><code class="language-bash">wget -O publicKey.pem https://rekor.example.com/api/v1/log/publicKey
 </code></pre>
 <p>Set it in the appropriate environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_REKOR_PUBLIC_KEY=&quot;$PWD/publicKey.pem&quot;
