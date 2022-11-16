@@ -148,8 +148,8 @@
 <p>A user first connects to a dex instance where an OpenID session is invoked.</p>
 <p>The user then authorises Fulcio to request the users email address as part of an
 OpenID scope. This email address is then recored into the x509 signing
-certificates</p>
-<p>Connect to the compute instance</p>
+certificates.</p>
+<p>Connect to the compute instance:</p>
 <pre><code class="language-bash">gcloud compute ssh sigstore-oauth2
 </code></pre>
 <h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
@@ -182,27 +182,28 @@ new shell prompt.
 </code></pre>
 <p>As suggested run</p>
 <pre><code class="language-bash">source /home/$USER/.bash_profile
+
 go version
 go version go1.17.1 linux/amd64
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config"><a class="header" href="#lets-encrypt-tls--ha-proxy-config">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
-private <code>IP</code> address</p>
+private <code>IP</code> address:</p>
 <pre><code class="language-bash">DOMAIN=&quot;oauth2.yourdomain.com&quot;
 IP=&quot;10.240.0.12&quot;
 </code></pre>
-<p>Let's now run certbot to obtain our TLS certs.</p>
+<p>Let's now run certbot to obtain our TLS certs:</p>
 <pre><code class="language-bash">sudo certbot certonly --standalone --preferred-challenges http \
       --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
       --non-interactive --agree-tos --email youremail@domain.com
 </code></pre>
-<p>Move the PEM chain into place</p>
+<p>Move the PEM chain into place:</p>
 <pre><code class="language-bash">sudo cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
     &quot;/etc/letsencrypt/live/${DOMAIN}/privkey.pem&quot; \
     | sudo tee &quot;/etc/ssl/private/${DOMAIN}.pem&quot; &gt; /dev/null
 </code></pre>
-<p>Now we need to change certbot configuration for automatic renewal</p>
-<p>Prepare post renewal script</p>
+<p>Now we need to change certbot configuration for automatic renewal.</p>
+<p>Prepare post renewal script:</p>
 <pre><code class="language-bash">cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 #!/bin/bash
 
@@ -214,19 +215,19 @@ cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
 
 systemctl reload haproxy.service
 </code></pre>
-<p>Make sure the script has executable flag set</p>
+<p>Make sure the script has executable flag set:</p>
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
-<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)</p>
+<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):</p>
 <pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
 </code></pre>
-<pre><code>http01_port = 9080
+<pre><code class="language-bash">http01_port = 9080
 http01_address = 127.0.0.1
 </code></pre>
 <p>Append new line</p>
-<pre><code>post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+<pre><code class="language-bash">post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
-<p>Prepare haproxy configuration</p>
+<p>Prepare haproxy configuration:</p>
 <pre><code class="language-bash">cat &gt; haproxy.cfg &lt;&lt;EOF
 defaults
     timeout connect 10s
@@ -259,20 +260,21 @@ backend letsencrypt-backend
 EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
-<p>If so, move it into place</p>
+<p>If so, move it into place:</p>
 <pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
 </code></pre>
-<p>Check syntax</p>
+<p>Check syntax:</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 </code></pre>
 <h3 id="start-haproxy"><a class="header" href="#start-haproxy">Start HAProxy</a></h3>
-<p>Let's now start HAProxy</p>
+<p>Let's now start HAProxy:</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
 
 Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable haproxy
 </code></pre>
 <pre><code class="language-bash">sudo systemctl restart haproxy.service
+
 sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
@@ -289,7 +291,7 @@ sudo systemctl status haproxy.service
 Jul 18 10:12:27 sigstore-fulcio systemd[1]: Starting HAProxy Load Balancer...
 Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 </code></pre>
-<p>Test automatic renewal</p>
+<p>Test automatic renewal:</p>
 <pre><code class="language-bash">sudo certbot renew --dry-run
 </code></pre>
 <h3 id="install-dex"><a class="header" href="#install-dex">Install Dex</a></h3>
@@ -337,7 +339,7 @@ The placeholders are already within <code>config.yaml</code></p>
 </ol>
 <h3 id="configure-dex"><a class="header" href="#configure-dex">Configure Dex</a></h3>
 <p>Set up the configuration file for dex.</p>
-<p>Provide saved OIDC details as variables</p>
+<p>Provide saved OIDC details as variables:</p>
 <pre><code class="language-bash">GOOGLE_CLIENT_ID=&quot;...&quot;
 GOOGLE_CLIENT_SECRET=&quot;...&quot;
 </code></pre>
@@ -401,7 +403,7 @@ connectors:
 #     redirectURI: https://${DOMAIN}/auth/callback
 EOF
 </code></pre>
-<p>Move configuration file</p>
+<p>Move configuration file:</p>
 <pre><code class="language-bash">sudo mkdir -p /var/dex/
 sudo mkdir -p /etc/dex/
 sudo mv dex-config.yaml /etc/dex/
@@ -409,8 +411,8 @@ sudo mv dex-config.yaml /etc/dex/
 <h3 id="start-dex"><a class="header" href="#start-dex">Start dex</a></h3>
 <pre><code class="language-bash">dex serve --web-http-addr=0.0.0.0:6000  /etc/dex/dex-config.yaml
 </code></pre>
-<p>You may create a bare minimal systemd service for dex</p>
-<pre><code class="language-bash">cat /etc/systemd/system/dex.service
+<p>You may create a bare minimal systemd service for dex:</p>
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/dex.service
 [Unit]
 Description=dex
 After=network-online.target
@@ -425,6 +427,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
 <pre><code class="language-bash">sudo systemctl daemon-reload
 sudo systemctl enable dex.service

@@ -145,8 +145,8 @@
                     <main>
                         <h1 id="sign-container"><a class="header" href="#sign-container">Sign Container</a></h1>
 <p>We are now ready to sign our container using our own sigstore infrastructure</p>
-<p>But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server</p>
-<p>Have this file locally and set it as an environment variable</p>
+<p>But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server.</p>
+<p>Have this file locally and set it as an environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE=&quot;/path/to/ctfe_public.pem&quot;
 </code></pre>
 <pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign sign --oidc-issuer &quot;https://oauth2.example.com/auth&quot; --fulcio-url &quot;https://fulcio.example.com&quot; --rekor-url &quot;https://rekor.example.com&quot; ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
@@ -180,7 +180,7 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 <p>Set it in the appropriate environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_REKOR_PUBLIC_KEY=&quot;$PWD/publicKey.pem&quot;
 </code></pre>
-<p>We can now verify</p>
+<p>We can now verify:</p>
 <pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
 </code></pre>
 <p>An example:</p>

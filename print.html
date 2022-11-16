@@ -212,19 +212,19 @@ too challenging)</p>
 </blockquote>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="provisioning-compute--network-resources"><a class="header" href="#provisioning-compute--network-resources">Provisioning Compute / Network Resources</a></h1>
 <h2 id="network-resources"><a class="header" href="#network-resources">Network Resources</a></h2>
-<p>We next need to create a network for our compute resources</p>
+<p>We next need to create a network for our compute resources:</p>
 <pre><code class="language-bash">gcloud compute networks create sigstore-the-hard-way-proj --subnet-mode custom
 </code></pre>
 <blockquote>
-<p>📝 if you recieve an <code>reason: UREQ_PROJECT_BILLING_NOT_FOUND</code> error. You need
+<p>📝 if you receive an <code>reason: UREQ_PROJECT_BILLING_NOT_FOUND</code> error, you need
 to <a href="https://support.google.com/googleapi/answer/6158867?hl=en">enable billing on the API</a></p>
 </blockquote>
-<p>We can now create a subnet with an internal range</p>
+<p>We can now create a subnet with an internal range:</p>
 <pre><code class="language-bash">gcloud compute networks subnets create sigstore \
     --network sigstore-the-hard-way-proj \
     --range 10.240.0.0/24
 </code></pre>
-<p>Create some firewall rules to allow tcp, udp and icmp protocols</p>
+<p>Create some firewall rules to allow tcp, udp and icmp protocols:</p>
 <pre><code class="language-bash">gcloud compute firewall-rules create sigstore-the-hard-way-proj-allow-internal \
     --allow tcp,udp,icmp \
     --network sigstore-the-hard-way-proj \
@@ -312,50 +312,57 @@ for $1. There are also lots of other providers. Use whatever works for you.</p>
 </code></pre>
 <p>We'll be using this variable throughout the following code-snippets.</p>
 <h3 id="rekorexamplecom"><a class="header" href="#rekorexamplecom">rekor.example.com</a></h3>
-<p>Grab your external / public IP</p>
-<pre><code class="language-bash">gcloud compute instances describe sigstore-rekor \
-  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+<p>Grab your external / public IP:</p>
+<pre><code class="language-bash">Rekor_PIP=$(gcloud compute instances describe sigstore-rekor \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 </code></pre>
 <p>You now want to make an &quot;A Record&quot; to a subdomain or &quot;rekor&quot; and to your external IP from the above command</p>
-<p>To create resource records on Google,</p>
+<p>To create resource records on Google:</p>
 <ol>
 <li>Go to <a href="https://domains.google.com/">Google Domains</a></li>
 <li>Click on your domain from the homepage</li>
 <li>DNS &gt; Manage Custom Records</li>
 </ol>
-<p>If you're using GCP as the DNS provider this can be done as follows</p>
-<pre><code class="language-bash">gcloud dns record-sets create rekor.$DOMAIN. \
-  --rrdatas=$(gcloud compute instances describe sigstore-rekor --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
-  --type=A --ttl=60 --zone=example-com
+<p>If you're using GCP as the DNS provider this can be done as follows:</p>
+<pre><code class="language-bash">export ZONE=&quot;example-com&quot;
+
+gcloud dns record-sets create rekor.$DOMAIN. \
+  --rrdatas=$Rekor_PIP \
+  --type=A --ttl=60 --zone=$ZONE
 </code></pre>
 <table><thead><tr><th>Type</th><th>Host</th><th>Value</th></tr></thead><tbody>
 <tr><td>A Record</td><td>rekor</td><td>x.x.x.x</td></tr>
 </tbody></table>
 <h3 id="fulcioexamplecom"><a class="header" href="#fulcioexamplecom">fulcio.example.com</a></h3>
-<p>Now repeat the same for fulcio, and dex</p>
-<pre><code class="language-bash">gcloud compute instances describe sigstore-fulcio \
-  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+<p>Now repeat the same for fulcio, and dex:</p>
+<pre><code class="language-bash">Fulcio_PIP=$(gcloud compute instances describe sigstore-fulcio \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 </code></pre>
-<p>If you're using GCP as the DNS provider this can be done as follows</p>
-<pre><code class="language-bash">gcloud dns record-sets create fulcio.$DOMAIN. \
-  --rrdatas=$(gcloud compute instances describe sigstore-fulcio --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
-  --type=A --ttl=60 --zone=example-com
+<p>If you're using GCP as the DNS provider this can be done as follows:</p>
+<pre><code class="language-bash">export ZONE=&quot;example-com&quot;
+
+gcloud dns record-sets create fulcio.$DOMAIN. \
+  --rrdatas=$Fulcio_PIP \
+  --type=A --ttl=60 --zone=$ZONE
 </code></pre>
 <table><thead><tr><th>Type</th><th>Host</th><th>Value</th></tr></thead><tbody>
 <tr><td>A Record</td><td>fulcio</td><td>x.x.x.x</td></tr>
 </tbody></table>
 <h3 id="oauth2examplecom"><a class="header" href="#oauth2examplecom">oauth2.example.com</a></h3>
-<pre><code class="language-bash">gcloud compute instances describe sigstore-oauth2 \
-  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+<pre><code class="language-bash">oauth2_PIP=$(gcloud compute instances describe sigstore-oauth2 \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
 </code></pre>
-<p>If you're using GCP as the DNS provider this can be done as follows</p>
+<p>If you're using GCP as the DNS provider this can be done as follows:</p>
 <pre><code class="language-bash">gcloud dns record-sets create oauth2.$DOMAIN. \
-  --rrdatas=$(gcloud compute instances describe sigstore-oauth2 --format='get(networkInterfaces[0].accessConfigs[0].natIP)') \
-  --type=A --ttl=60 --zone=example-com
+  --rrdatas=$oauth2_PIP \
+  --type=A --ttl=60 --zone=$ZONE
 </code></pre>
 <table><thead><tr><th>Type</th><th>Host</th><th>Value</th></tr></thead><tbody>
 <tr><td>A Record</td><td>oauth2</td><td>x.x.x.x</td></tr>
 </tbody></table>
+<p>Check the records-sets generated during this process:</p>
+<pre><code class="language-bash">gcloud dns record-sets list --zone $ZONE
+</code></pre>
 <blockquote>
 <p>📝 We do not need a domain for the certificate transparency log. This only
 communicate over a private network to Fulcio.</p>
@@ -364,18 +371,18 @@ communicate over a private network to Fulcio.</p>
 <p>Rekor is sigstores signature transparency log.</p>
 <p>Rekor requires running instances of trillian's log server and signer, with a database backend. A few different databases
 can be used by trillian, for this example we will use mariadb.</p>
-<p>Let's start by logging in</p>
+<p>Let's start by logging in:</p>
 <pre><code class="language-bash">gcloud compute ssh sigstore-rekor
 </code></pre>
 <h2 id="dependencies"><a class="header" href="#dependencies">Dependencies</a></h2>
-<p>We need a few dependencies installed</p>
-<p>Update your system</p>
+<p>We need a few dependencies installed.</p>
+<p>Update your system:</p>
 <pre><code class="language-bash">sudo apt-get update -y
 </code></pre>
-<p>If you want to save up some time, remove man-db first</p>
+<p>If you want to save up some time, remove man-db first:</p>
 <pre><code class="language-bash">sudo apt-get remove -y --purge man-db
 </code></pre>
-<p>Grab the following packages</p>
+<p>Grab the following packages:</p>
 <pre><code class="language-bash">sudo apt-get install mariadb-server git redis-server haproxy certbot -y
 </code></pre>
 <blockquote>
@@ -383,7 +390,7 @@ can be used by trillian, for this example we will use mariadb.</p>
 you need to start rekor with <code>--enable_retrieve_api=false</code></p>
 </blockquote>
 <h3 id="install-latest-golang-compiler"><a class="header" href="#install-latest-golang-compiler">Install latest golang compiler</a></h3>
-<p>Download and run the golang installer (system package is not yet 1.16)</p>
+<p>Download and run the golang installer (system package is not yet 1.16):</p>
 <pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 </code></pre>
 <pre><code class="language-bash">chmod +x installer_linux
@@ -391,7 +398,7 @@ you need to start rekor with <code>--enable_retrieve_api=false</code></p>
 <pre><code class="language-bash">./installer_linux
 </code></pre>
 <p>e.g.</p>
-<pre><code>Welcome to the Go installer!
+<pre><code class="language-bash">Welcome to the Go installer!
 Downloading Go version go1.17.1 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
@@ -402,18 +409,19 @@ One more thing! Run `source /home/$USER/.bash_profile` to persist the
 new environment variables to your current session, or open a
 new shell prompt.
 </code></pre>
-<p>As suggested run</p>
+<p>As suggested run:</p>
 <pre><code class="language-bash">source /home/$USER/.bash_profile
+
 go version
 go version go1.17.1 linux/amd64
 </code></pre>
 <h3 id="install-rekor"><a class="header" href="#install-rekor">Install rekor</a></h3>
-<p>We will work with the rekor repo (we grab the whole repo as we will need a some scripts)</p>
+<p>We will work with the rekor repo (we grab the whole repo as we will need a some scripts):</p>
 <pre><code class="language-bash">mkdir -p ~/go/src/github.com/sigstore &amp;&amp; cd &quot;$_&quot;
 </code></pre>
 <pre><code class="language-bash">git clone https://github.com/sigstore/rekor.git &amp;&amp; cd rekor/
 </code></pre>
-<p>And let's install both the server and the CLI</p>
+<p>And let's install both the server and the CLI:</p>
 <pre><code class="language-bash">go build -o rekor-cli ./cmd/rekor-cli
 </code></pre>
 <pre><code class="language-bash">sudo mv rekor-cli /usr/local/bin/
@@ -424,8 +432,8 @@ go version go1.17.1 linux/amd64
 </code></pre>
 <h3 id="database"><a class="header" href="#database">Database</a></h3>
 <p>Trillian requires a database, let's first run <code>mysql_secure_installation</code> to
-remove test accounts etc.</p>
-<pre><code>sudo mysql_secure_installation
+remove test accounts etc:</p>
+<pre><code class="language-bash">sudo mysql_secure_installation
 
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
@@ -439,7 +447,7 @@ Enter current password for root (enter for none):
 OK, successfully used password, moving on...
 
 Setting the root password ensures that nobody can log into the MariaDB
-root user without the proper authorisation.
+root user without the proper authorization.
 
 Set root password? [Y/n] n
  ... skipping.
@@ -482,10 +490,10 @@ installation should now be secure.
 
 Thanks for using MariaDB!
 </code></pre>
-<p>We can now build the database</p>
+<p>We can now build the database.</p>
 <p>Within the rekor repository is a <code>scripts/createdb.sh</code> script.</p>
 <p>Edit this script and populate the root password <code>ROOTPASS</code> you set for the system
-and then run the script (leave blank if not)</p>
+and then run the script (leave blank if not):</p>
 <pre><code class="language-bash">cd scripts/
 sudo ./createdb.sh
 Creating test database and test user account
@@ -502,13 +510,13 @@ Loading table data..
 </code></pre>
 <h3 id="run-trillian"><a class="header" href="#run-trillian">Run trillian</a></h3>
 <p>The following are best run in two terminals, which are then left open (this
-helps for debugging)</p>
+helps for debugging):</p>
 <pre><code class="language-bash">trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
 </code></pre>
 <pre><code class="language-bash">trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
 </code></pre>
-<p>Alternatively, create bare minimal systemd services</p>
-<pre><code class="language-bash">cat /etc/systemd/system/trillian_log_server.service
+<p>Alternatively, create bare minimal systemd services:</p>
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/trillian_log_server.service
 [Unit]
 Description=trillian_log_server
 After=network-online.target
@@ -523,8 +531,9 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
-<pre><code class="language-bash">cat /etc/systemd/system/trillian_log_signer.service
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/trillian_log_signer.service
 [Unit]
 Description=trillian_log_signer
 After=network-online.target
@@ -539,13 +548,16 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
-<p>Enable systemd services</p>
+<p>Enable systemd services:</p>
 <pre><code class="language-bash">sudo systemctl daemon-reload
 </code></pre>
 <pre><code class="language-bash">sudo systemctl enable trillian_log_server.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
+
 sudo systemctl start trillian_log_server.service
+
 sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
@@ -560,12 +572,12 @@ sudo systemctl status trillian_log_signer.service
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
 </code></pre>
 <h3 id="start-rekor"><a class="header" href="#start-rekor">Start rekor</a></h3>
-<p>Start rekor</p>
+<p>Start rekor:</p>
 <pre><code class="language-bash">rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 </code></pre>
-<p>Note: Rekor runs on port 3000 on all interfaces by default</p>
-<p>Alternatively, you may create a bare minimal systemd service similar to trillian above</p>
-<pre><code class="language-bash">cat /etc/systemd/system/rekor.service
+<p>Note: Rekor runs on port 3000 on all interfaces by default.</p>
+<p>Alternatively, you may create a bare minimal systemd service similar to trillian above:</p>
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/rekor.service
 [Unit]
 Description=rekor
 After=network-online.target
@@ -580,7 +592,9 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
+<p>Enable systemd services:</p>
 <pre><code class="language-bash">sudo systemctl daemon-reload
 sudo systemctl enable rekor.service
 sudo systemctl start rekor.service
@@ -588,22 +602,22 @@ sudo systemctl status rekor.service
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config"><a class="header" href="#lets-encrypt-tls--ha-proxy-config">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
-private IP address.</p>
+private IP address:</p>
 <pre><code class="language-bash">DOMAIN=&quot;rekor.example.com&quot;
 IP=&quot;10.240.0.10&quot;
 </code></pre>
-<p>Let's now run certbot to obtain our TLS certs.</p>
+<p>Let's now run certbot to obtain our TLS certs:</p>
 <pre><code class="language-bash">sudo certbot certonly --standalone --preferred-challenges http \
       --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
       --non-interactive --agree-tos --email youremail@domain.com
 </code></pre>
-<p>Move the PEM chain into place</p>
+<p>Move the PEM chain into place:</p>
 <pre><code class="language-bash">sudo cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
     &quot;/etc/letsencrypt/live/${DOMAIN}/privkey.pem&quot; \
     | sudo tee &quot;/etc/ssl/private/${DOMAIN}.pem&quot; &gt; /dev/null
 </code></pre>
-<p>Now we need to change certbot configuration for automatic renewal</p>
-<p>Prepare post renewal script</p>
+<p>Now we need to change certbot configuration for automatic renewal.</p>
+<p>Prepare post renewal script:</p>
 <pre><code class="language-bash">cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 #!/bin/bash
 
@@ -615,19 +629,19 @@ cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
 
 systemctl reload haproxy.service
 </code></pre>
-<p>Make sure the script has executable flag set</p>
+<p>Make sure the script has executable flag set:</p>
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
-<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)</p>
+<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):</p>
 <pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/rekor.example.com.conf
 </code></pre>
-<pre><code>http01_port = 9080
+<pre><code class="language-bash">http01_port = 9080
 http01_address = 127.0.0.1
 </code></pre>
-<p>Append new line</p>
-<pre><code>post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+<p>Append new line:</p>
+<pre><code class="language-bash">post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
-<p>Prepare haproxy configuration</p>
+<p>Prepare haproxy configuration:</p>
 <pre><code class="language-bash">cat &gt; haproxy.cfg &lt;&lt;EOF
 defaults
     timeout connect 10s
@@ -660,20 +674,21 @@ backend letsencrypt-backend
 EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
-<p>If so, move it into place</p>
+<p>If so, move it into place:</p>
 <pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
 </code></pre>
-<p>Check syntax</p>
+<p>Check syntax:</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 </code></pre>
 <h3 id="start-haproxy"><a class="header" href="#start-haproxy">Start HAProxy</a></h3>
-<p>Let's now start HAProxy</p>
+<p>Let's now start HAProxy:</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
 
 Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable haproxy
 </code></pre>
 <pre><code class="language-bash">sudo systemctl restart haproxy.service
+
 sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
@@ -694,12 +709,14 @@ Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 <pre><code class="language-bash">sudo certbot renew --dry-run
 </code></pre>
 <h3 id="test-rekor"><a class="header" href="#test-rekor">Test rekor</a></h3>
-<p>Now we will test the operation of rekor. From the rekor repository (so we have
+<p>Now we will test the operation of rekor. From the <a href="https://github.com/sigstore/rekor">rekor repository</a> (so we have
 some test files) we can perform an inclusion by adding some signing materials</p>
 <pre><code class="language-bash">rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_key.key --signature tests/test_file.sig --rekor_server http://127.0.0.1:3000
 </code></pre>
 <p>Example:</p>
-<pre><code>rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_key.key --signature tests/test_file.sig --rekor_server http://127.0.0.1:3000
+<pre><code class="language-bash">git clone https://github.com/sigstore/rekor.git &amp;&amp; cd rekor
+
+rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_key.key --signature tests/test_file.sig --rekor_server http://127.0.0.1:3000
 Created entry at index 0, available at: http://127.0.0.1:3000/api/v1/log/entries/b08416d417acdb0610d4a030d8f697f9d0a718024681a00fa0b9ba67072a38b5
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="dex"><a class="header" href="#dex">Dex</a></h1>
@@ -707,8 +724,8 @@ Created entry at index 0, available at: http://127.0.0.1:3000/api/v1/log/entries
 <p>A user first connects to a dex instance where an OpenID session is invoked.</p>
 <p>The user then authorises Fulcio to request the users email address as part of an
 OpenID scope. This email address is then recored into the x509 signing
-certificates</p>
-<p>Connect to the compute instance</p>
+certificates.</p>
+<p>Connect to the compute instance:</p>
 <pre><code class="language-bash">gcloud compute ssh sigstore-oauth2
 </code></pre>
 <h2 id="dependencies-1"><a class="header" href="#dependencies-1">Dependencies</a></h2>
@@ -741,27 +758,28 @@ new shell prompt.
 </code></pre>
 <p>As suggested run</p>
 <pre><code class="language-bash">source /home/$USER/.bash_profile
+
 go version
 go version go1.17.1 linux/amd64
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config-1"><a class="header" href="#lets-encrypt-tls--ha-proxy-config-1">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
-private <code>IP</code> address</p>
+private <code>IP</code> address:</p>
 <pre><code class="language-bash">DOMAIN=&quot;oauth2.yourdomain.com&quot;
 IP=&quot;10.240.0.12&quot;
 </code></pre>
-<p>Let's now run certbot to obtain our TLS certs.</p>
+<p>Let's now run certbot to obtain our TLS certs:</p>
 <pre><code class="language-bash">sudo certbot certonly --standalone --preferred-challenges http \
       --http-01-address ${IP} --http-01-port 80 -d ${DOMAIN} \
       --non-interactive --agree-tos --email youremail@domain.com
 </code></pre>
-<p>Move the PEM chain into place</p>
+<p>Move the PEM chain into place:</p>
 <pre><code class="language-bash">sudo cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
     &quot;/etc/letsencrypt/live/${DOMAIN}/privkey.pem&quot; \
     | sudo tee &quot;/etc/ssl/private/${DOMAIN}.pem&quot; &gt; /dev/null
 </code></pre>
-<p>Now we need to change certbot configuration for automatic renewal</p>
-<p>Prepare post renewal script</p>
+<p>Now we need to change certbot configuration for automatic renewal.</p>
+<p>Prepare post renewal script:</p>
 <pre><code class="language-bash">cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 #!/bin/bash
 
@@ -773,19 +791,19 @@ cat &quot;/etc/letsencrypt/live/${DOMAIN}/fullchain.pem&quot; \
 
 systemctl reload haproxy.service
 </code></pre>
-<p>Make sure the script has executable flag set</p>
+<p>Make sure the script has executable flag set:</p>
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
-<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)</p>
+<p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):</p>
 <pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
 </code></pre>
-<pre><code>http01_port = 9080
+<pre><code class="language-bash">http01_port = 9080
 http01_address = 127.0.0.1
 </code></pre>
 <p>Append new line</p>
-<pre><code>post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
+<pre><code class="language-bash">post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
-<p>Prepare haproxy configuration</p>
+<p>Prepare haproxy configuration:</p>
 <pre><code class="language-bash">cat &gt; haproxy.cfg &lt;&lt;EOF
 defaults
     timeout connect 10s
@@ -818,20 +836,21 @@ backend letsencrypt-backend
 EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
-<p>If so, move it into place</p>
+<p>If so, move it into place:</p>
 <pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
 </code></pre>
-<p>Check syntax</p>
+<p>Check syntax:</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 </code></pre>
 <h3 id="start-haproxy-1"><a class="header" href="#start-haproxy-1">Start HAProxy</a></h3>
-<p>Let's now start HAProxy</p>
+<p>Let's now start HAProxy:</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
 
 Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 Executing: /lib/systemd/systemd-sysv-install enable haproxy
 </code></pre>
 <pre><code class="language-bash">sudo systemctl restart haproxy.service
+
 sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
@@ -848,7 +867,7 @@ sudo systemctl status haproxy.service
 Jul 18 10:12:27 sigstore-fulcio systemd[1]: Starting HAProxy Load Balancer...
 Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 </code></pre>
-<p>Test automatic renewal</p>
+<p>Test automatic renewal:</p>
 <pre><code class="language-bash">sudo certbot renew --dry-run
 </code></pre>
 <h3 id="install-dex"><a class="header" href="#install-dex">Install Dex</a></h3>
@@ -896,7 +915,7 @@ The placeholders are already within <code>config.yaml</code></p>
 </ol>
 <h3 id="configure-dex"><a class="header" href="#configure-dex">Configure Dex</a></h3>
 <p>Set up the configuration file for dex.</p>
-<p>Provide saved OIDC details as variables</p>
+<p>Provide saved OIDC details as variables:</p>
 <pre><code class="language-bash">GOOGLE_CLIENT_ID=&quot;...&quot;
 GOOGLE_CLIENT_SECRET=&quot;...&quot;
 </code></pre>
@@ -960,7 +979,7 @@ connectors:
 #     redirectURI: https://${DOMAIN}/auth/callback
 EOF
 </code></pre>
-<p>Move configuration file</p>
+<p>Move configuration file:</p>
 <pre><code class="language-bash">sudo mkdir -p /var/dex/
 sudo mkdir -p /etc/dex/
 sudo mv dex-config.yaml /etc/dex/
@@ -968,8 +987,8 @@ sudo mv dex-config.yaml /etc/dex/
 <h3 id="start-dex"><a class="header" href="#start-dex">Start dex</a></h3>
 <pre><code class="language-bash">dex serve --web-http-addr=0.0.0.0:6000  /etc/dex/dex-config.yaml
 </code></pre>
-<p>You may create a bare minimal systemd service for dex</p>
-<pre><code class="language-bash">cat /etc/systemd/system/dex.service
+<p>You may create a bare minimal systemd service for dex:</p>
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/dex.service
 [Unit]
 Description=dex
 After=network-online.target
@@ -984,6 +1003,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
 <pre><code class="language-bash">sudo systemctl daemon-reload
 sudo systemctl enable dex.service
@@ -1242,7 +1262,7 @@ Access:     local
 <pre><code class="language-bash">cd $HOME/fulcio-config/
 fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
 </code></pre>
-<p>An example</p>
+<p>An example:</p>
 <pre><code class="language-bash">cd $HOME/fulcio-config/
 fulcio createca --org=acme --country=USA --locality=Anytown --province=AnyPlace --postal-code=ABCDEF --street-address=123 Main St --hsm-caroot-id 1 --out fulcio-root.pem
 2021-10-01T18:09:16.284Z        INFO    app/createca.go:48      binding to PKCS11 HSM
@@ -1387,7 +1407,7 @@ set this up next.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="certificate-transparency-log"><a class="header" href="#certificate-transparency-log">Certificate transparency log</a></h1>
 <p>We will now install the Certificate transparency log (CTL).</p>
 <p>CTL requires running instances of trillian's log server and signer</p>
-<p>Let's start by logging in</p>
+<p>Let's start by logging in:</p>
 <pre><code class="language-bash">gcloud compute ssh sigstore-ctl
 </code></pre>
 <h2 id="dependencies-3"><a class="header" href="#dependencies-3">Dependencies</a></h2>
@@ -1407,7 +1427,7 @@ set this up next.</p>
 <pre><code class="language-bash">./installer_linux
 </code></pre>
 <p>e.g.</p>
-<pre><code>Welcome to the Go installer!
+<pre><code class="language-bash">Welcome to the Go installer!
 Downloading Go version go1.17.1 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
@@ -1664,7 +1684,7 @@ to push an image and a signature with cosign. You can however
 using an OCI registry, <a href="https://github.com/sigstore/cosign#registry-support">see here</a>
 for a list of those currently supported by cosign.</p>
 <p>First, let's create an image. You can use the following <code>Dockerfile</code> or any existing image
-you already have locally</p>
+you already have locally:</p>
 <pre><code class="language-bash">cat &gt; Dockerfile &lt;&lt;EOF
 FROM alpine
 CMD [&quot;echo&quot;, &quot;Hello Sigstore!&quot;]
@@ -1705,39 +1725,39 @@ and download a release specific to your hardware (MacOS, Linux, Windows)</p>
 </ul>
 <p>Verify the signing.</p>
 <h3 id="linux-binary"><a class="header" href="#linux-binary">Linux binary</a></h3>
-<p>Download required files</p>
+<p>Download required files:</p>
 <pre><code class="language-bash">curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.11.1/{cosign-linux-amd64,release-cosign.pub,cosign-linux-amd64.sig}
 </code></pre>
-<p>Verify signature</p>
+<p>Verify signature:</p>
 <pre><code class="language-bash">openssl dgst -sha256 -verify release-cosign.pub -signature &lt;(cat cosign-linux-amd64.sig | base64 -d) cosign-linux-amd64
 Verified OK
 </code></pre>
-<p>Remove signature files</p>
+<p>Remove signature files:</p>
 <pre><code class="language-bash">rm cosign-linux-amd64.sig release-cosign.pub
 </code></pre>
-<p>Install</p>
+<p>Install cosign:</p>
 <pre><code class="language-bash">chmod +x cosign-linux-amd64
 sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 </code></pre>
 <h3 id="macos-binary"><a class="header" href="#macos-binary">MacOS binary</a></h3>
-<p>Download required files</p>
+<p>Download required files:</p>
 <pre><code class="language-bash">curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.11.1/{cosign-darwin-amd64,release-cosign.pub,cosign-darwin-amd64.sig}
 </code></pre>
-<p>Verify signature</p>
+<p>Verify signature:</p>
 <pre><code class="language-bash">openssl dgst -sha256 -verify release-cosign.pub -signature &lt;(cat cosign-darwin-amd64.sig | base64 -D) cosign-darwin-amd64
 Verified OK
 </code></pre>
-<p>Remove signature files</p>
+<p>Remove signature files:</p>
 <pre><code class="language-bash">rm cosign-darwin-amd64.sig release-cosign.pub
 </code></pre>
-<p>Install</p>
+<p>Install cosign:</p>
 <pre><code class="language-bash">chmod +x cosign-darwin-amd64
 sudo mv cosign-darwin-amd64 /usr/local/bin/cosign
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sign-container"><a class="header" href="#sign-container">Sign Container</a></h1>
 <p>We are now ready to sign our container using our own sigstore infrastructure</p>
-<p>But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server</p>
-<p>Have this file locally and set it as an environment variable</p>
+<p>But before we do that, we need to use our own TUF public key file, you might remember created this when deploying the certificate transparency server.</p>
+<p>Have this file locally and set it as an environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_CT_LOG_PUBLIC_KEY_FILE=&quot;/path/to/ctfe_public.pem&quot;
 </code></pre>
 <pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign sign --oidc-issuer &quot;https://oauth2.example.com/auth&quot; --fulcio-url &quot;https://fulcio.example.com&quot; --rekor-url &quot;https://rekor.example.com&quot; ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
@@ -1771,7 +1791,7 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 <p>Set it in the appropriate environment variable:</p>
 <pre><code class="language-bash">export SIGSTORE_REKOR_PUBLIC_KEY=&quot;$PWD/publicKey.pem&quot;
 </code></pre>
-<p>We can now verify</p>
+<p>We can now verify:</p>
 <pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
 </code></pre>
 <p>An example:</p>

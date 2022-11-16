@@ -145,19 +145,19 @@
                     <main>
                         <h1 id="provisioning-compute--network-resources"><a class="header" href="#provisioning-compute--network-resources">Provisioning Compute / Network Resources</a></h1>
 <h2 id="network-resources"><a class="header" href="#network-resources">Network Resources</a></h2>
-<p>We next need to create a network for our compute resources</p>
+<p>We next need to create a network for our compute resources:</p>
 <pre><code class="language-bash">gcloud compute networks create sigstore-the-hard-way-proj --subnet-mode custom
 </code></pre>
 <blockquote>
-<p>📝 if you recieve an <code>reason: UREQ_PROJECT_BILLING_NOT_FOUND</code> error. You need
+<p>📝 if you receive an <code>reason: UREQ_PROJECT_BILLING_NOT_FOUND</code> error, you need
 to <a href="https://support.google.com/googleapi/answer/6158867?hl=en">enable billing on the API</a></p>
 </blockquote>
-<p>We can now create a subnet with an internal range</p>
+<p>We can now create a subnet with an internal range:</p>
 <pre><code class="language-bash">gcloud compute networks subnets create sigstore \
     --network sigstore-the-hard-way-proj \
     --range 10.240.0.0/24
 </code></pre>
-<p>Create some firewall rules to allow tcp, udp and icmp protocols</p>
+<p>Create some firewall rules to allow tcp, udp and icmp protocols:</p>
 <pre><code class="language-bash">gcloud compute firewall-rules create sigstore-the-hard-way-proj-allow-internal \
     --allow tcp,udp,icmp \
     --network sigstore-the-hard-way-proj \
