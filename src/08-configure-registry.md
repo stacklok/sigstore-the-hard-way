@@ -6,7 +6,7 @@ using an OCI registry, [see here](https://github.com/sigstore/cosign#registry-su
 for a list of those currently supported by cosign.
 
 First, let's create an image. You can use the following `Dockerfile` or any existing image
-you already have locally
+you already have locally:
 
 ```bash
 cat > Dockerfile <<EOF

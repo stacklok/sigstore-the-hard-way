@@ -2,16 +2,16 @@
 
 ## Network Resources
 
-We next need to create a network for our compute resources
+We next need to create a network for our compute resources:
 
 ```bash
 gcloud compute networks create sigstore-the-hard-way-proj --subnet-mode custom
 ```
 
-> 📝 if you recieve an `reason: UREQ_PROJECT_BILLING_NOT_FOUND` error. You need
+> 📝 if you receive an `reason: UREQ_PROJECT_BILLING_NOT_FOUND` error, you need
   to [enable billing on the API](https://support.google.com/googleapi/answer/6158867?hl=en)
 
-We can now create a subnet with an internal range
+We can now create a subnet with an internal range:
 
 ```bash
 gcloud compute networks subnets create sigstore \
@@ -19,7 +19,7 @@ gcloud compute networks subnets create sigstore \
     --range 10.240.0.0/24
 ```
 
-Create some firewall rules to allow tcp, udp and icmp protocols
+Create some firewall rules to allow tcp, udp and icmp protocols:
 
 ```bash
 gcloud compute firewall-rules create sigstore-the-hard-way-proj-allow-internal \
@@ -42,6 +42,7 @@ gcloud compute firewall-rules list --filter="network:sigstore-the-hard-way-proj"
 ```
 
 You should see an output similar to the following:
+
 ```bash
 NAME                                       NETWORK                     DIRECTION  PRIORITY  ALLOW                       DENY  DISABLED
 sigstore-the-hard-way-allow-external       sigstore-the-hard-way-proj  INGRESS    1000      tcp:22,tcp:80,tcp:443,icmp        False

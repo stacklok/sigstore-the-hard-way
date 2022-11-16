@@ -5,7 +5,7 @@ Rekor is sigstores signature transparency log.
 Rekor requires running instances of trillian's log server and signer, with a database backend. A few different databases
 can be used by trillian, for this example we will use mariadb.
 
-Let's start by logging in
+Let's start by logging in:
 
 ```bash
 gcloud compute ssh sigstore-rekor
@@ -13,21 +13,21 @@ gcloud compute ssh sigstore-rekor
 
 ## Dependencies
 
-We need a few dependencies installed
+We need a few dependencies installed.
 
-Update your system
+Update your system:
 
 ```bash
 sudo apt-get update -y
 ```
 
-If you want to save up some time, remove man-db first
+If you want to save up some time, remove man-db first:
 
 ```bash
 sudo apt-get remove -y --purge man-db
 ```
 
-Grab the following packages
+Grab the following packages:
 
 ```bash
 sudo apt-get install mariadb-server git redis-server haproxy certbot -y
@@ -38,7 +38,7 @@ sudo apt-get install mariadb-server git redis-server haproxy certbot -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16)
+Download and run the golang installer (system package is not yet 1.16):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -54,7 +54,7 @@ chmod +x installer_linux
 
 e.g.
 
-```
+```bash
 Welcome to the Go installer!
 Downloading Go version go1.17.1 to /home/luke/.go
 This may take a bit of time...
@@ -67,17 +67,18 @@ new environment variables to your current session, or open a
 new shell prompt.
 ```
 
-As suggested run
+As suggested run:
 
 ```bash
 source /home/$USER/.bash_profile
+
 go version
 go version go1.17.1 linux/amd64
 ```
 
 ### Install rekor
 
-We will work with the rekor repo (we grab the whole repo as we will need a some scripts)
+We will work with the rekor repo (we grab the whole repo as we will need a some scripts):
 
 ```bash
 mkdir -p ~/go/src/github.com/sigstore && cd "$_"
@@ -87,7 +88,7 @@ mkdir -p ~/go/src/github.com/sigstore && cd "$_"
 git clone https://github.com/sigstore/rekor.git && cd rekor/
 ```
 
-And let's install both the server and the CLI
+And let's install both the server and the CLI:
 
 ```bash
 go build -o rekor-cli ./cmd/rekor-cli
@@ -108,9 +109,9 @@ sudo mv rekor-server /usr/local/bin/
 ### Database
 
 Trillian requires a database, let's first run `mysql_secure_installation` to
-remove test accounts etc.
+remove test accounts etc:
 
-```
+```bash
 sudo mysql_secure_installation
 
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
@@ -125,7 +126,7 @@ Enter current password for root (enter for none):
 OK, successfully used password, moving on...
 
 Setting the root password ensures that nobody can log into the MariaDB
-root user without the proper authorisation.
+root user without the proper authorization.
 
 Set root password? [Y/n] n
  ... skipping.
@@ -169,12 +170,12 @@ installation should now be secure.
 Thanks for using MariaDB!
 ```
 
-We can now build the database
+We can now build the database.
 
 Within the rekor repository is a `scripts/createdb.sh` script.
 
 Edit this script and populate the root password `ROOTPASS` you set for the system
-and then run the script (leave blank if not)
+and then run the script (leave blank if not):
 
 ```bash
 cd scripts/
@@ -204,7 +205,7 @@ sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
 ### Run trillian
 
 The following are best run in two terminals, which are then left open (this
-  helps for debugging)
+  helps for debugging):
 
 ```bash
 trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 --logtostderr ...
@@ -214,10 +215,10 @@ trillian_log_server -http_endpoint=localhost:8090 -rpc_endpoint=localhost:8091 -
 trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
 ```
 
-Alternatively, create bare minimal systemd services
+Alternatively, create bare minimal systemd services:
 
 ```bash
-cat /etc/systemd/system/trillian_log_server.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/trillian_log_server.service
 [Unit]
 Description=trillian_log_server
 After=network-online.target
@@ -232,10 +233,11 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 ```bash
-cat /etc/systemd/system/trillian_log_signer.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/trillian_log_signer.service
 [Unit]
 Description=trillian_log_signer
 After=network-online.target
@@ -250,9 +252,10 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
-Enable systemd services
+Enable systemd services:
 
 ```bash
 sudo systemctl daemon-reload
@@ -261,7 +264,9 @@ sudo systemctl daemon-reload
 ```bash
 sudo systemctl enable trillian_log_server.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
+
 sudo systemctl start trillian_log_server.service
+
 sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
@@ -280,18 +285,18 @@ sudo systemctl status trillian_log_signer.service
 
 ### Start rekor
 
-Start rekor
+Start rekor:
 
 ```bash
 rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 ```
 
-Note: Rekor runs on port 3000 on all interfaces by default
+Note: Rekor runs on port 3000 on all interfaces by default.
 
-Alternatively, you may create a bare minimal systemd service similar to trillian above
+Alternatively, you may create a bare minimal systemd service similar to trillian above:
 
 ```bash
-cat /etc/systemd/system/rekor.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/rekor.service
 [Unit]
 Description=rekor
 After=network-online.target
@@ -306,7 +311,10 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
+
+Enable systemd services:
 
 ```bash
 sudo systemctl daemon-reload
@@ -318,14 +326,14 @@ sudo systemctl status rekor.service
 ### Let's encrypt (TLS) & HA Proxy config
 
 Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
-private IP address.
+private IP address:
 
 ```bash
 DOMAIN="rekor.example.com"
 IP="10.240.0.10"
 ```
 
-Let's now run certbot to obtain our TLS certs.
+Let's now run certbot to obtain our TLS certs:
 
 ```bash
 sudo certbot certonly --standalone --preferred-challenges http \
@@ -333,7 +341,7 @@ sudo certbot certonly --standalone --preferred-challenges http \
       --non-interactive --agree-tos --email youremail@domain.com
 ```
 
-Move the PEM chain into place
+Move the PEM chain into place:
 
 ```bash
 sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
@@ -341,9 +349,9 @@ sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
     | sudo tee "/etc/ssl/private/${DOMAIN}.pem" > /dev/null
 ```
 
-Now we need to change certbot configuration for automatic renewal
+Now we need to change certbot configuration for automatic renewal.
 
-Prepare post renewal script
+Prepare post renewal script:
 
 ```bash
 cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
@@ -358,30 +366,30 @@ cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
 systemctl reload haproxy.service
 ```
 
-Make sure the script has executable flag set
+Make sure the script has executable flag set:
 
 ```bash
 sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
-Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
+Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):
 
 ```bash
 ls -l /etc/letsencrypt/renewal/rekor.example.com.conf
 ```
 
-```
+```bash
 http01_port = 9080
 http01_address = 127.0.0.1
 ```
 
-Append new line
+Append new line:
 
-```
+```bash
 post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
-Prepare haproxy configuration
+Prepare haproxy configuration:
 
 ```bash
 cat > haproxy.cfg <<EOF
@@ -418,13 +426,13 @@ EOF
 
 Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 
-If so, move it into place
+If so, move it into place:
 
 ```bash
 sudo mv haproxy.cfg /etc/haproxy/
 ```
 
-Check syntax
+Check syntax:
 
 ```bash
 sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
@@ -432,7 +440,7 @@ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 
 ### Start HAProxy
 
-Let's now start HAProxy
+Let's now start HAProxy:
 
 ```bash
 sudo systemctl enable haproxy.service
@@ -443,6 +451,7 @@ Executing: /lib/systemd/systemd-sysv-install enable haproxy
 
 ```bash
 sudo systemctl restart haproxy.service
+
 sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
@@ -468,7 +477,7 @@ sudo certbot renew --dry-run
 
 ### Test rekor
 
-Now we will test the operation of rekor. From the rekor repository (so we have
+Now we will test the operation of rekor. From the [rekor repository](https://github.com/sigstore/rekor) (so we have
 some test files) we can perform an inclusion by adding some signing materials
 
 ```bash
@@ -477,7 +486,9 @@ rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_k
 
 Example:
 
-```
+```bash
+git clone https://github.com/sigstore/rekor.git && cd rekor
+
 rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_key.key --signature tests/test_file.sig --rekor_server http://127.0.0.1:3000
 Created entry at index 0, available at: http://127.0.0.1:3000/api/v1/log/entries/b08416d417acdb0610d4a030d8f697f9d0a718024681a00fa0b9ba67072a38b5
 ```

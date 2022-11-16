@@ -4,7 +4,7 @@ We will now install the Certificate transparency log (CTL).
 
 CTL requires running instances of trillian's log server and signer
 
-Let's start by logging in
+Let's start by logging in:
 
 ```bash
 gcloud compute ssh sigstore-ctl
@@ -44,7 +44,7 @@ chmod +x installer_linux
 
 e.g.
 
-```
+```bash
 Welcome to the Go installer!
 Downloading Go version go1.17.1 to /home/luke/.go
 This may take a bit of time...

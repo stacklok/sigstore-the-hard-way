@@ -17,26 +17,26 @@ Verify the signing.
 
 ### Linux binary
 
-Download required files
+Download required files:
 
 ```bash
 curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.11.1/{cosign-linux-amd64,release-cosign.pub,cosign-linux-amd64.sig}
 ```
 
-Verify signature
+Verify signature:
 
 ```bash
 openssl dgst -sha256 -verify release-cosign.pub -signature <(cat cosign-linux-amd64.sig | base64 -d) cosign-linux-amd64
 Verified OK
 ```
 
-Remove signature files
+Remove signature files:
 
 ```bash
 rm cosign-linux-amd64.sig release-cosign.pub
 ```
 
-Install
+Install cosign:
 
 ```bash
 chmod +x cosign-linux-amd64
@@ -45,26 +45,26 @@ sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 
 ### MacOS binary
 
-Download required files
+Download required files:
 
 ```bash
 curl -fsSL --remote-name-all https://github.com/sigstore/cosign/releases/download/v1.11.1/{cosign-darwin-amd64,release-cosign.pub,cosign-darwin-amd64.sig}
 ```
 
-Verify signature
+Verify signature:
 
 ```bash
 openssl dgst -sha256 -verify release-cosign.pub -signature <(cat cosign-darwin-amd64.sig | base64 -D) cosign-darwin-amd64
 Verified OK
 ```
 
-Remove signature files
+Remove signature files:
 
 ```bash
 rm cosign-darwin-amd64.sig release-cosign.pub
 ```
 
-Install
+Install cosign:
 
 ```bash
 chmod +x cosign-darwin-amd64

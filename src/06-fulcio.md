@@ -359,7 +359,7 @@ cd $HOME/fulcio-config/
 fulcio createca --org={ORG} --country={UK} --locality={TOWN} --province={PROVINCE} --postal-code={POST_CODE} --street-address={STREET} --hsm-caroot-id 1 --out fulcio-root.pem
 ```
 
-An example
+An example:
 
 ```bash
 cd $HOME/fulcio-config/

@@ -6,9 +6,9 @@ A user first connects to a dex instance where an OpenID session is invoked.
 
 The user then authorises Fulcio to request the users email address as part of an
 OpenID scope. This email address is then recored into the x509 signing
-certificates
+certificates.
 
-Connect to the compute instance
+Connect to the compute instance:
 
 ```bash
 gcloud compute ssh sigstore-oauth2
@@ -65,6 +65,7 @@ As suggested run
 
 ```bash
 source /home/$USER/.bash_profile
+
 go version
 go version go1.17.1 linux/amd64
 ```
@@ -72,14 +73,14 @@ go version go1.17.1 linux/amd64
 ### Let's encrypt (TLS) & HA Proxy config
 
 Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
-private `IP` address
+private `IP` address:
 
 ```bash
 DOMAIN="oauth2.yourdomain.com"
 IP="10.240.0.12"
 ```
 
-Let's now run certbot to obtain our TLS certs.
+Let's now run certbot to obtain our TLS certs:
 
 ```bash
 sudo certbot certonly --standalone --preferred-challenges http \
@@ -87,7 +88,7 @@ sudo certbot certonly --standalone --preferred-challenges http \
       --non-interactive --agree-tos --email youremail@domain.com
 ```
 
-Move the PEM chain into place
+Move the PEM chain into place:
 
 ```bash
 sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
@@ -95,9 +96,9 @@ sudo cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
     | sudo tee "/etc/ssl/private/${DOMAIN}.pem" > /dev/null
 ```
 
-Now we need to change certbot configuration for automatic renewal
+Now we need to change certbot configuration for automatic renewal.
 
-Prepare post renewal script
+Prepare post renewal script:
 
 ```bash
 cat /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
@@ -112,30 +113,30 @@ cat "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" \
 systemctl reload haproxy.service
 ```
 
-Make sure the script has executable flag set
+Make sure the script has executable flag set:
 
 ```bash
 sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
-Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
+Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):
 
 ```bash
 ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
 ```
 
-```
+```bash
 http01_port = 9080
 http01_address = 127.0.0.1
 ```
 
 Append new line
 
-```
+```bash
 post_hook = /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 ```
 
-Prepare haproxy configuration
+Prepare haproxy configuration:
 
 ```bash
 cat > haproxy.cfg <<EOF
@@ -172,13 +173,13 @@ EOF
 
 Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 
-If so, move it into place
+If so, move it into place:
 
 ```bash
 sudo mv haproxy.cfg /etc/haproxy/
 ```
 
-Check syntax
+Check syntax:
 
 ```bash
 sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
@@ -186,7 +187,7 @@ sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
 
 ### Start HAProxy
 
-Let's now start HAProxy
+Let's now start HAProxy:
 
 ```bash
 sudo systemctl enable haproxy.service
@@ -197,6 +198,7 @@ Executing: /lib/systemd/systemd-sysv-install enable haproxy
 
 ```bash
 sudo systemctl restart haproxy.service
+
 sudo systemctl status haproxy.service
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
@@ -214,7 +216,7 @@ Jul 18 10:12:27 sigstore-fulcio systemd[1]: Starting HAProxy Load Balancer...
 Jul 18 10:12:28 sigstore-fulcio systemd[1]: Started HAProxy Load Balancer.
 ```
 
-Test automatic renewal
+Test automatic renewal:
 
 ```bash
 sudo certbot renew --dry-run
@@ -278,7 +280,7 @@ sudo mv bin/dex /usr/local/bin/
 
 Set up the configuration file for dex.
 
-Provide saved OIDC details as variables
+Provide saved OIDC details as variables:
 
 ```bash
 GOOGLE_CLIENT_ID="..."
@@ -347,7 +349,7 @@ connectors:
 EOF
 ```
 
-Move configuration file
+Move configuration file:
 
 ```bash
 sudo mkdir -p /var/dex/
@@ -361,10 +363,10 @@ sudo mv dex-config.yaml /etc/dex/
 dex serve --web-http-addr=0.0.0.0:6000  /etc/dex/dex-config.yaml
 ```
 
-You may create a bare minimal systemd service for dex
+You may create a bare minimal systemd service for dex:
 
 ```bash
-cat /etc/systemd/system/dex.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/dex.service
 [Unit]
 Description=dex
 After=network-online.target
@@ -379,6 +381,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 ```bash
