@@ -28,7 +28,7 @@ sudo apt-get install mariadb-server git wget -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16)
+Download and run the golang installer (system package are often older than what Trillian requires):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -46,7 +46,7 @@ e.g.
 
 ```bash
 Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -62,7 +62,7 @@ As suggested run
 ```bash
 source /home/$USER/.bash_profile
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 ```
 
 ### Database
