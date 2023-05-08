@@ -95,7 +95,7 @@ go build -o rekor-cli ./cmd/rekor-cli
 ```
 
 ```bash
-sudo mv rekor-cli /usr/local/bin/
+sudo cp rekor-cli /usr/local/bin/
 ```
 
 ```bash
@@ -103,7 +103,7 @@ go build -o rekor-server ./cmd/rekor-server
 ```
 
 ```bash
-sudo mv rekor-server /usr/local/bin/
+sudo cp rekor-server /usr/local/bin/
 ```
 
 ### Database
@@ -191,7 +191,7 @@ go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
 ```bash
@@ -199,7 +199,7 @@ go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 ```
 
 ### Run trillian
@@ -426,10 +426,10 @@ EOF
 
 Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 
-If so, move it into place:
+If so, copy it into place:
 
 ```bash
-sudo mv haproxy.cfg /etc/haproxy/
+sudo cp haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax:

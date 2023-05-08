@@ -161,7 +161,7 @@ go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
 ```bash
@@ -169,7 +169,7 @@ go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 ```
 
 ```bash
@@ -177,7 +177,7 @@ go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df
 ```
 
 ```bash
-sudo mv ~/go/bin/createtree /usr/local/bin/
+sudo cp ~/go/bin/createtree /usr/local/bin/
 ```
 
 ### Run trillian
@@ -263,7 +263,7 @@ go install github.com/google/certificate-transparency-go/trillian/ctfe/ct_server
 ```
 
 ```bash
-sudo mv ~/go/bin/ct_server /usr/local/bin/
+sudo cp ~/go/bin/ct_server /usr/local/bin/
 ```
 
 ### Create a private key
@@ -332,9 +332,9 @@ when generating the private key.
 
 ```bash
 sudo mkdir -p /etc/ctfe-config/
-sudo mv ct.cfg /etc/ctfe-config/
-sudo mv fulcio-root.pem /etc/ctfe-config/
-sudo mv privkey.pem /etc/ctfe-config/
+sudo cp ct.cfg /etc/ctfe-config/
+sudo cp fulcio-root.pem /etc/ctfe-config/
+sudo cp privkey.pem /etc/ctfe-config/
 ```
 
 ### Start the CT log

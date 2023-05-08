@@ -176,7 +176,7 @@ Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 If so, move it into place:
 
 ```bash
-sudo mv haproxy.cfg /etc/haproxy/
+sudo cp haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax:
@@ -232,7 +232,7 @@ git clone https://github.com/dexidp/dex.git
 ```bash
 cd dex
 make build
-sudo mv bin/dex /usr/local/bin/
+sudo cp bin/dex /usr/local/bin/
 ```
 
 ### Obtain Google OAUTH credentials
@@ -349,12 +349,12 @@ connectors:
 EOF
 ```
 
-Move configuration file:
+Copy configuration file:
 
 ```bash
 sudo mkdir -p /var/dex/
 sudo mkdir -p /etc/dex/
-sudo mv dex-config.yaml /etc/dex/
+sudo cp dex-config.yaml /etc/dex/
 ```
 
 ### Start dex

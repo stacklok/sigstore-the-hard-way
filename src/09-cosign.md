@@ -40,7 +40,7 @@ Install cosign:
 
 ```bash
 chmod +x cosign-linux-amd64
-sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+sudo cp cosign-linux-amd64 /usr/local/bin/cosign
 ```
 
 ### MacOS binary
@@ -68,5 +68,5 @@ Install cosign:
 
 ```bash
 chmod +x cosign-darwin-amd64
-sudo mv cosign-darwin-amd64 /usr/local/bin/cosign
+sudo cp cosign-darwin-amd64 /usr/local/bin/cosign
 ```

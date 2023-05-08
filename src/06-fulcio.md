@@ -84,7 +84,7 @@ go install github.com/sigstore/fulcio@v0.5.2
 ```
 
 ```bash
-sudo mv ~/go/bin/fulcio /usr/local/bin/
+sudo cp ~/go/bin/fulcio /usr/local/bin/
 ```
 
 ### Let's encrypt (TLS) & HA Proxy config
@@ -190,10 +190,10 @@ EOF
 
 Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 
-If so, move it into place
+If so, copy it into place
 
 ```bash
-sudo mv haproxy.cfg /etc/haproxy/
+sudo cp haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax
