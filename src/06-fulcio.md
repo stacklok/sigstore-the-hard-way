@@ -139,7 +139,7 @@ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
 
 ```bash
-ls -l /etc/letsencrypt/renewal/fulcio.example.com.conf
+sudo vim /etc/letsencrypt/renewal/fulcio.example.com.conf
 ```
 
 ```
