@@ -191,15 +191,14 @@ Let's now start HAProxy:
 
 ```bash
 sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
+sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
 ```
 
+Should print something like:
 ```bash
-sudo systemctl restart haproxy.service
-
-sudo systemctl status haproxy.service
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago

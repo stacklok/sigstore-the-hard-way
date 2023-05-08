@@ -238,23 +238,20 @@ Enable systemd services
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl enable trillian_log_server.service
+sudo systemctl start trillian_log_server.service
+sudo systemctl status trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
+sudo systemctl start trillian_log_signer.service
+sudo systemctl status trillian_log_signer.service
 ```
 
 ```bash
-sudo systemctl enable trillian_log_server.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-sudo systemctl start trillian_log_server.service
-sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-```
-
-```bash
-sudo systemctl enable trillian_log_signer.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago

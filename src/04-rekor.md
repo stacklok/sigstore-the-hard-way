@@ -263,25 +263,19 @@ Enable systemd services:
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl enable trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
+sudo systemctl start trillian_log_server.service
+sudo systemctl start trillian_log_signer.service
+sudo systemctl status trillian_log_server.service
+sudo systemctl status trillian_log_signer.service
 ```
 
+After the systemd services have been enabled, the output from the last command should be similar to:
 ```bash
-sudo systemctl enable trillian_log_server.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-
-sudo systemctl start trillian_log_server.service
-
-sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-```
-
-```bash
-sudo systemctl enable trillian_log_signer.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -325,6 +319,19 @@ sudo systemctl daemon-reload
 sudo systemctl enable rekor.service
 sudo systemctl start rekor.service
 sudo systemctl status rekor.service
+```
+
+The last command should print:
+```bash
+ rekor.service - rekor
+     Loaded: loaded (/etc/systemd/system/rekor.service; enabled; vendor preset: enabled)
+     Active: active (running) since Mon 2023-05-08 11:09:20 UTC; 2h 0min ago
+   Main PID: 21612 (rekor-server)
+      Tasks: 8 (limit: 2353)
+     Memory: 21.8M
+        CPU: 649ms
+     CGroup: /system.slice/rekor.service
+             └─21612 /usr/local/bin/rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 ```
 
 ### Let's encrypt (TLS) & HA Proxy config
@@ -448,15 +455,14 @@ Let's now start HAProxy:
 
 ```bash
 sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
+sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
 ```
 
+Should print:
 ```bash
-sudo systemctl restart haproxy.service
-
-sudo systemctl status haproxy.service
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
