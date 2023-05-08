@@ -489,6 +489,6 @@ Example:
 ```bash
 git clone https://github.com/sigstore/rekor.git && cd rekor
 
-rekor-cli upload --artifact tests/test_file.txt --public-key tests/test_public_key.key --signature tests/test_file.sig --rekor_server http://127.0.0.1:3000
+rekor-cli upload --artifact pkg/types/rekord/tests/test_file.txt --public-key ./pkg/types/rekord/tests/test_public_key.key --signature ./pkg/types/rekord/tests/test_file.sig --rekor_server http://127.0.0.1:3000
 Created entry at index 0, available at: http://127.0.0.1:3000/api/v1/log/entries/b08416d417acdb0610d4a030d8f697f9d0a718024681a00fa0b9ba67072a38b5
 ```
