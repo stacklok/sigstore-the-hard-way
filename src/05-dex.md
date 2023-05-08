@@ -76,7 +76,7 @@ Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
 private `IP` address:
 
 ```bash
-DOMAIN="oauth2.yourdomain.com"
+DOMAIN="oauth2.example.com"
 IP="10.240.0.12"
 ```
 

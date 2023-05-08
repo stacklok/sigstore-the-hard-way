@@ -93,7 +93,7 @@ Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
 private `IP` address
 
 ```bash
-DOMAIN="fulcio.yourdomain.com"
+DOMAIN="fulcio.example.com"
 IP="10.240.0.11"
 ```
 
