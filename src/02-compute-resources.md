@@ -57,7 +57,7 @@ Now we need to create four compute nodes for each service.
 gcloud compute instances create sigstore-rekor \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.10 \
@@ -70,7 +70,7 @@ gcloud compute instances create sigstore-rekor \
 gcloud compute instances create sigstore-fulcio \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.11 \
@@ -83,7 +83,7 @@ gcloud compute instances create sigstore-fulcio \
 gcloud compute instances create sigstore-oauth2 \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.12 \
@@ -96,7 +96,7 @@ gcloud compute instances create sigstore-oauth2 \
 gcloud compute instances create sigstore-ctl \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.13 \
