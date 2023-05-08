@@ -113,7 +113,11 @@ remove test accounts etc:
 
 ```bash
 sudo mysql_secure_installation
+```
 
+The script is interactive. The following snippet captures the answers to
+the script's prompts:
+```bash
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
