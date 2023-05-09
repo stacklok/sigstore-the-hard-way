@@ -161,7 +161,7 @@ Loading table data..
 ### Install trillian components
 
 ```bash
-go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/trillian_log_server@v1.5.1
 ```
 
 ```bash
@@ -169,7 +169,7 @@ sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
 ```bash
-go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/trillian_log_signer@v1.5.1
 ```
 
 ```bash
@@ -177,7 +177,7 @@ sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 ```
 
 ```bash
-go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/createtree@v1.5.1
 ```
 
 ```bash
