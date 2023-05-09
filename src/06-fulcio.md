@@ -516,7 +516,7 @@ sudo systemctl status fulcio.service
 ## File CA
 
 ```bash
-fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=fulcio-config/fulcio-root.pem  --fileca-key=fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=$HOME/fulcio-config/fulcio-root.pem  --fileca-key=$HOME/fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 ## SoftHSM
