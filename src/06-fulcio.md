@@ -80,7 +80,7 @@ go version go1.20.4 linux/amd64
 ### Install Fulcio
 
 ```bash
-go install github.com/sigstore/fulcio@v0.5.2
+go install github.com/sigstore/fulcio@v1.3.1
 ```
 
 ```bash
