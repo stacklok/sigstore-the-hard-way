@@ -478,10 +478,13 @@ mv config.json $HOME/fulcio-config/
 
 # Start FulcioCA
 
-We now have two methods of starting Fulcio depending on your Certificate
+We now have three methods of starting Fulcio depending on your Certificate
 Authority system choice.
 
-In both cases you may create a bare minimal systemd service
+In each case you may create a bare minimal systemd service. Note
+that the systemd service uses `/etc/fulcio-config` as the working
+directory, being a system-wide service, while the examples earlier used
+`$HOME/fulcio-config`. Copy the `config.json` file as appropriate.
 
 ```bash
 cat /etc/systemd/system/fulcio.service
