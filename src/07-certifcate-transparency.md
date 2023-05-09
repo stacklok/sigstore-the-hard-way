@@ -199,7 +199,7 @@ trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 
 Alternatively, create bare minimal systemd services
 
 ```bash
-cat /etc/systemd/system/trillian_log_server.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/trillian_log_server.service
 [Unit]
 Description=trillian_log_server
 After=network-online.target
@@ -214,10 +214,11 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 ```bash
-cat /etc/systemd/system/trillian_log_signer.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/trillian_log_signer.service
 [Unit]
 Description=trillian_log_signer
 After=network-online.target
@@ -232,6 +233,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 Enable systemd services
@@ -350,7 +352,7 @@ ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server local
 You may create a bare minimal systemd service
 
 ```bash
-cat /etc/systemd/system/ct_server.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/ct_server.service
 [Unit]
 Description=ct_server
 After=network-online.target
@@ -365,6 +367,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 ```bash
