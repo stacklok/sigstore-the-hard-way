@@ -497,7 +497,7 @@ StartLimitBurst=5
 
 [Service]
 Environment=SOFTHSM2_CONF=/etc/fulcio-config/config/softhsm2.cfg
-ExecStart=/usr/local/bin/fulcio serve --config-path=/etc/fulcio-config/config.json ...
+ExecStart=/usr/local/bin/fulcio serve ...
 WorkingDirectory=/etc/fulcio-config
 Restart=on-failure
 RestartSec=5s
@@ -531,7 +531,7 @@ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-c
 ## Google Certificate Authority Service
 
 ```bash
-fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+fulcio serve --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 > 📝 Your resource name is a long POSIX type path string, e.g. `projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx`
@@ -539,5 +539,5 @@ fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_pr
 For example
 
 ```
-fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
+fulcio serve --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
 ```
