@@ -59,13 +59,14 @@ export SIGSTORE_REKOR_PUBLIC_KEY="$PWD/publicKey.pem"
 We can now verify:
 
 ```bash
-COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign verify --certificate-identity <OIDC-IDENTITY-EMAIL> --certificate-oidc-issuer https://<OIDC-SERVER-URL>/auth --rekor-url https://rekor.example.com ghcr.io/<github_user>/sigstore-thw:latest
 ```
 
+Replace `<OIDC-IDENTITY-EMAIL>` with the e-mail address of the identity you used to sign to your Dex instance.
 An example:
 
 ```bash
-COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+COSIGN_EXPERIMENTAL=1 cosign verify --certificate-identity lhinds@redhat.com --certificate-oidc-issuer https://oauth2.decodebytes.sh/auth --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw
 
 Verification for ghcr.io/lukehinds/sigstore-thw:latest --
 The following checks were performed on each of these signatures:
