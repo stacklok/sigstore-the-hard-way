@@ -40,7 +40,7 @@ sudo apt-get install git gcc haproxy softhsm certbot opensc -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16)
+Download and run the golang installer (system package are often older than what Fulcio requires):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -58,7 +58,7 @@ e.g.
 
 ```
 Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -74,17 +74,17 @@ As suggested run
 ```bash
 source /home/$USER/.bash_profile
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 ```
 
 ### Install Fulcio
 
 ```bash
-go install github.com/sigstore/fulcio@v0.5.2
+go install github.com/sigstore/fulcio@v1.3.1
 ```
 
 ```bash
-sudo mv ~/go/bin/fulcio /usr/local/bin/
+sudo cp ~/go/bin/fulcio /usr/local/bin/
 ```
 
 ### Let's encrypt (TLS) & HA Proxy config
@@ -93,7 +93,7 @@ Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
 private `IP` address
 
 ```bash
-DOMAIN="fulcio.yourdomain.com"
+DOMAIN="fulcio.example.com"
 IP="10.240.0.11"
 ```
 
@@ -139,7 +139,7 @@ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)
 
 ```bash
-ls -l /etc/letsencrypt/renewal/fulcio.example.com.conf
+sudo vim /etc/letsencrypt/renewal/fulcio.example.com.conf
 ```
 
 ```
@@ -190,10 +190,10 @@ EOF
 
 Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 
-If so, move it into place
+If so, copy it into place
 
 ```bash
-sudo mv haproxy.cfg /etc/haproxy/
+sudo cp haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax
@@ -208,14 +208,14 @@ Let's now start HAProxy
 
 ```bash
 sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
-```
-
-```bash
 sudo systemctl restart haproxy.service
 sudo systemctl status haproxy.service
+```
+
+The above should print:
+```bash
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -478,10 +478,13 @@ mv config.json $HOME/fulcio-config/
 
 # Start FulcioCA
 
-We now have two methods of starting Fulcio depending on your Certificate
+We now have three methods of starting Fulcio depending on your Certificate
 Authority system choice.
 
-In both cases you may create a bare minimal systemd service
+In each case you may create a bare minimal systemd service. Note
+that the systemd service uses `/etc/fulcio-config` as the working
+directory, being a system-wide service, while the examples earlier used
+`$HOME/fulcio-config`. Copy the `config.json` file as appropriate.
 
 ```bash
 cat /etc/systemd/system/fulcio.service
@@ -494,7 +497,7 @@ StartLimitBurst=5
 
 [Service]
 Environment=SOFTHSM2_CONF=/etc/fulcio-config/config/softhsm2.cfg
-ExecStart=/usr/local/bin/fulcio serve --config-path=/etc/fulcio-config/config.json ...
+ExecStart=/usr/local/bin/fulcio serve ...
 WorkingDirectory=/etc/fulcio-config
 Restart=on-failure
 RestartSec=5s
@@ -513,7 +516,7 @@ sudo systemctl status fulcio.service
 ## File CA
 
 ```bash
-fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=fulcio-config/fulcio-root.pem  --fileca-key=fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=$HOME/fulcio-config/fulcio-root.pem  --fileca-key=$HOME/fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 ## SoftHSM
@@ -528,7 +531,7 @@ fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-c
 ## Google Certificate Authority Service
 
 ```bash
-fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+fulcio serve --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 ```
 
 > 📝 Your resource name is a long POSIX type path string, e.g. `projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx`
@@ -536,5 +539,5 @@ fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_pr
 For example
 
 ```
-fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
+fulcio serve --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
 ```

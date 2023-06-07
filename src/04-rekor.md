@@ -38,7 +38,7 @@ sudo apt-get install mariadb-server git redis-server haproxy certbot -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16):
+Download and run the golang installer (system package are often older than what rekor requires):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -56,7 +56,7 @@ e.g.
 
 ```bash
 Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -73,7 +73,7 @@ As suggested run:
 source /home/$USER/.bash_profile
 
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 ```
 
 ### Install rekor
@@ -95,7 +95,7 @@ go build -o rekor-cli ./cmd/rekor-cli
 ```
 
 ```bash
-sudo mv rekor-cli /usr/local/bin/
+sudo cp rekor-cli /usr/local/bin/
 ```
 
 ```bash
@@ -103,7 +103,7 @@ go build -o rekor-server ./cmd/rekor-server
 ```
 
 ```bash
-sudo mv rekor-server /usr/local/bin/
+sudo cp rekor-server /usr/local/bin/
 ```
 
 ### Database
@@ -113,7 +113,11 @@ remove test accounts etc:
 
 ```bash
 sudo mysql_secure_installation
+```
 
+The script is interactive. The following snippet captures the answers to
+the script's prompts:
+```bash
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
@@ -191,7 +195,7 @@ go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
 ```bash
@@ -199,7 +203,7 @@ go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 ```
 
 ### Run trillian
@@ -259,25 +263,19 @@ Enable systemd services:
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl enable trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
+sudo systemctl start trillian_log_server.service
+sudo systemctl start trillian_log_signer.service
+sudo systemctl status trillian_log_server.service
+sudo systemctl status trillian_log_signer.service
 ```
 
+After the systemd services have been enabled, the output from the last command should be similar to:
 ```bash
-sudo systemctl enable trillian_log_server.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-
-sudo systemctl start trillian_log_server.service
-
-sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-```
-
-```bash
-sudo systemctl enable trillian_log_signer.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -321,6 +319,19 @@ sudo systemctl daemon-reload
 sudo systemctl enable rekor.service
 sudo systemctl start rekor.service
 sudo systemctl status rekor.service
+```
+
+The last command should print:
+```bash
+ rekor.service - rekor
+     Loaded: loaded (/etc/systemd/system/rekor.service; enabled; vendor preset: enabled)
+     Active: active (running) since Mon 2023-05-08 11:09:20 UTC; 2h 0min ago
+   Main PID: 21612 (rekor-server)
+      Tasks: 8 (limit: 2353)
+     Memory: 21.8M
+        CPU: 649ms
+     CGroup: /system.slice/rekor.service
+             └─21612 /usr/local/bin/rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 ```
 
 ### Let's encrypt (TLS) & HA Proxy config
@@ -375,7 +386,7 @@ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):
 
 ```bash
-ls -l /etc/letsencrypt/renewal/rekor.example.com.conf
+sudo vim /etc/letsencrypt/renewal/rekor.example.com.conf
 ```
 
 ```bash
@@ -426,10 +437,10 @@ EOF
 
 Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 
-If so, move it into place:
+If so, copy it into place:
 
 ```bash
-sudo mv haproxy.cfg /etc/haproxy/
+sudo cp haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax:
@@ -444,15 +455,14 @@ Let's now start HAProxy:
 
 ```bash
 sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
+sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
 ```
 
+Should print:
 ```bash
-sudo systemctl restart haproxy.service
-
-sudo systemctl status haproxy.service
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago

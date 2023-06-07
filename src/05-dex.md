@@ -32,7 +32,7 @@ sudo apt-get install haproxy make git gcc certbot -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16)
+Download and run the golang installer (system package are often older than what Dex requires):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -50,7 +50,7 @@ e.g.
 
 ```
 Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -67,7 +67,7 @@ As suggested run
 source /home/$USER/.bash_profile
 
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 ```
 
 ### Let's encrypt (TLS) & HA Proxy config
@@ -76,7 +76,7 @@ Let's create a HAProxy config, set `DOMAIN` to your registered domain and your
 private `IP` address:
 
 ```bash
-DOMAIN="oauth2.yourdomain.com"
+DOMAIN="oauth2.example.com"
 IP="10.240.0.12"
 ```
 
@@ -122,7 +122,7 @@ sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):
 
 ```bash
-ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
+sudo vim /etc/letsencrypt/renewal/oauth2.example.com.conf
 ```
 
 ```bash
@@ -176,7 +176,7 @@ Inspect the resulting `haproxy.cfg` and make sure everything looks correct.
 If so, move it into place:
 
 ```bash
-sudo mv haproxy.cfg /etc/haproxy/
+sudo cp haproxy.cfg /etc/haproxy/
 ```
 
 Check syntax:
@@ -191,15 +191,14 @@ Let's now start HAProxy:
 
 ```bash
 sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
+sudo systemctl restart haproxy.service
+sudo systemctl status haproxy.service
 ```
 
+Should print something like:
 ```bash
-sudo systemctl restart haproxy.service
-
-sudo systemctl status haproxy.service
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -232,7 +231,7 @@ git clone https://github.com/dexidp/dex.git
 ```bash
 cd dex
 make build
-sudo mv bin/dex /usr/local/bin/
+sudo cp bin/dex /usr/local/bin/
 ```
 
 ### Obtain Google OAUTH credentials
@@ -349,12 +348,12 @@ connectors:
 EOF
 ```
 
-Move configuration file:
+Copy configuration file:
 
 ```bash
 sudo mkdir -p /var/dex/
 sudo mkdir -p /etc/dex/
-sudo mv dex-config.yaml /etc/dex/
+sudo cp dex-config.yaml /etc/dex/
 ```
 
 ### Start dex

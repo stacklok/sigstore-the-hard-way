@@ -28,7 +28,7 @@ sudo apt-get install mariadb-server git wget -y
 
 ### Install latest golang compiler
 
-Download and run the golang installer (system package is not yet 1.16)
+Download and run the golang installer (system package are often older than what Trillian requires):
 
 ```bash
 curl -O https://storage.googleapis.com/golang/getgo/installer_linux
@@ -46,7 +46,7 @@ e.g.
 
 ```bash
 Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -62,16 +62,20 @@ As suggested run
 ```bash
 source /home/$USER/.bash_profile
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 ```
 
 ### Database
 
-Trillian requires a databbase, let's first run `mysql_secure_installation`
+Trillian requires a database, let's first run `mysql_secure_installation`
 
 ```bash
 sudo mysql_secure_installation
+```
 
+The script is interactive. The following snippet captures the answers to
+the script's prompts:
+```bash
 NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
@@ -157,27 +161,27 @@ Loading table data..
 ### Install trillian components
 
 ```bash
-go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/trillian_log_server@v1.5.1
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 ```
 
 ```bash
-go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/trillian_log_signer@v1.5.1
 ```
 
 ```bash
-sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 ```
 
 ```bash
-go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
+go install github.com/google/trillian/cmd/createtree@v1.5.1
 ```
 
 ```bash
-sudo mv ~/go/bin/createtree /usr/local/bin/
+sudo cp ~/go/bin/createtree /usr/local/bin/
 ```
 
 ### Run trillian
@@ -195,7 +199,7 @@ trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 
 Alternatively, create bare minimal systemd services
 
 ```bash
-cat /etc/systemd/system/trillian_log_server.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/trillian_log_server.service
 [Unit]
 Description=trillian_log_server
 After=network-online.target
@@ -210,10 +214,11 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 ```bash
-cat /etc/systemd/system/trillian_log_signer.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/trillian_log_signer.service
 [Unit]
 Description=trillian_log_signer
 After=network-online.target
@@ -228,29 +233,27 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 Enable systemd services
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl enable trillian_log_server.service
+sudo systemctl start trillian_log_server.service
+sudo systemctl status trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
+sudo systemctl start trillian_log_signer.service
+sudo systemctl status trillian_log_signer.service
 ```
 
 ```bash
-sudo systemctl enable trillian_log_server.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-sudo systemctl start trillian_log_server.service
-sudo systemctl status trillian_log_server.service
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-```
-
-```bash
-sudo systemctl enable trillian_log_signer.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -263,7 +266,7 @@ go install github.com/google/certificate-transparency-go/trillian/ctfe/ct_server
 ```
 
 ```bash
-sudo mv ~/go/bin/ct_server /usr/local/bin/
+sudo cp ~/go/bin/ct_server /usr/local/bin/
 ```
 
 ### Create a private key
@@ -332,9 +335,9 @@ when generating the private key.
 
 ```bash
 sudo mkdir -p /etc/ctfe-config/
-sudo mv ct.cfg /etc/ctfe-config/
-sudo mv fulcio-root.pem /etc/ctfe-config/
-sudo mv privkey.pem /etc/ctfe-config/
+sudo cp ct.cfg /etc/ctfe-config/
+sudo cp fulcio-root.pem /etc/ctfe-config/
+sudo cp privkey.pem /etc/ctfe-config/
 ```
 
 ### Start the CT log
@@ -349,7 +352,7 @@ ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server local
 You may create a bare minimal systemd service
 
 ```bash
-cat /etc/systemd/system/ct_server.service
+sudo bash -c 'cat << EOF > /etc/systemd/system/ct_server.service
 [Unit]
 Description=ct_server
 After=network-online.target
@@ -364,6 +367,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 ```
 
 ```bash
