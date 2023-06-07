@@ -181,10 +181,11 @@ Pushing signature to: ghcr.io/lukehinds/sigstore-thw:latest:sha256-568999d4aedd4
 <pre><code class="language-bash">export SIGSTORE_REKOR_PUBLIC_KEY=&quot;$PWD/publicKey.pem&quot;
 </code></pre>
 <p>We can now verify:</p>
-<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.example.com ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
+<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --certificate-identity &lt;OIDC-IDENTITY-EMAIL&gt; --certificate-oidc-issuer https://&lt;OIDC-SERVER-URL&gt;/auth --rekor-url https://rekor.example.com ghcr.io/&lt;github_user&gt;/sigstore-thw:latest
 </code></pre>
-<p>An example:</p>
-<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw:latest
+<p>Replace <code>&lt;OIDC-IDENTITY-EMAIL&gt;</code> with the e-mail address of the identity you used to sign to your Dex instance.
+An example:</p>
+<pre><code class="language-bash">COSIGN_EXPERIMENTAL=1 cosign verify --certificate-identity lhinds@redhat.com --certificate-oidc-issuer https://oauth2.decodebytes.sh/auth --rekor-url https://rekor.decodebytes.sh ghcr.io/lukehinds/sigstore-thw
 
 Verification for ghcr.io/lukehinds/sigstore-thw:latest --
 The following checks were performed on each of these signatures:
