@@ -166,7 +166,7 @@ can be used by trillian, for this example we will use mariadb.</p>
 you need to start rekor with <code>--enable_retrieve_api=false</code></p>
 </blockquote>
 <h3 id="install-latest-golang-compiler"><a class="header" href="#install-latest-golang-compiler">Install latest golang compiler</a></h3>
-<p>Download and run the golang installer (system package is not yet 1.16):</p>
+<p>Download and run the golang installer (system package are often older than what rekor requires):</p>
 <pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 </code></pre>
 <pre><code class="language-bash">chmod +x installer_linux
@@ -175,7 +175,7 @@ you need to start rekor with <code>--enable_retrieve_api=false</code></p>
 </code></pre>
 <p>e.g.</p>
 <pre><code class="language-bash">Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -189,7 +189,7 @@ new shell prompt.
 <pre><code class="language-bash">source /home/$USER/.bash_profile
 
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 </code></pre>
 <h3 id="install-rekor"><a class="header" href="#install-rekor">Install rekor</a></h3>
 <p>We will work with the rekor repo (we grab the whole repo as we will need a some scripts):</p>
@@ -200,18 +200,20 @@ go version go1.17.1 linux/amd64
 <p>And let's install both the server and the CLI:</p>
 <pre><code class="language-bash">go build -o rekor-cli ./cmd/rekor-cli
 </code></pre>
-<pre><code class="language-bash">sudo mv rekor-cli /usr/local/bin/
+<pre><code class="language-bash">sudo cp rekor-cli /usr/local/bin/
 </code></pre>
 <pre><code class="language-bash">go build -o rekor-server ./cmd/rekor-server
 </code></pre>
-<pre><code class="language-bash">sudo mv rekor-server /usr/local/bin/
+<pre><code class="language-bash">sudo cp rekor-server /usr/local/bin/
 </code></pre>
 <h3 id="database"><a class="header" href="#database">Database</a></h3>
 <p>Trillian requires a database, let's first run <code>mysql_secure_installation</code> to
 remove test accounts etc:</p>
 <pre><code class="language-bash">sudo mysql_secure_installation
-
-NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
+</code></pre>
+<p>The script is interactive. The following snippet captures the answers to
+the script's prompts:</p>
+<pre><code class="language-bash">NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
 In order to log into MariaDB to secure it, we'll need the current
@@ -278,11 +280,11 @@ Loading table data..
 <h3 id="install-trillian-components"><a class="header" href="#install-trillian-components">Install trillian components</a></h3>
 <pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 </code></pre>
 <pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 </code></pre>
 <h3 id="run-trillian"><a class="header" href="#run-trillian">Run trillian</a></h3>
 <p>The following are best run in two terminals, which are then left open (this
@@ -328,21 +330,17 @@ EOF'
 </code></pre>
 <p>Enable systemd services:</p>
 <pre><code class="language-bash">sudo systemctl daemon-reload
-</code></pre>
-<pre><code class="language-bash">sudo systemctl enable trillian_log_server.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-
+sudo systemctl enable trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
 sudo systemctl start trillian_log_server.service
-
+sudo systemctl start trillian_log_signer.service
 sudo systemctl status trillian_log_server.service
-● trillian_log_server.service - trillian_log_server
+sudo systemctl status trillian_log_signer.service
+</code></pre>
+<p>After the systemd services have been enabled, the output from the last command should be similar to:</p>
+<pre><code class="language-bash">● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-</code></pre>
-<pre><code class="language-bash">sudo systemctl enable trillian_log_signer.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -375,6 +373,17 @@ EOF'
 sudo systemctl enable rekor.service
 sudo systemctl start rekor.service
 sudo systemctl status rekor.service
+</code></pre>
+<p>The last command should print:</p>
+<pre><code class="language-bash"> rekor.service - rekor
+     Loaded: loaded (/etc/systemd/system/rekor.service; enabled; vendor preset: enabled)
+     Active: active (running) since Mon 2023-05-08 11:09:20 UTC; 2h 0min ago
+   Main PID: 21612 (rekor-server)
+      Tasks: 8 (limit: 2353)
+     Memory: 21.8M
+        CPU: 649ms
+     CGroup: /system.slice/rekor.service
+             └─21612 /usr/local/bin/rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config"><a class="header" href="#lets-encrypt-tls--ha-proxy-config">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
@@ -409,7 +418,7 @@ systemctl reload haproxy.service
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
 <p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):</p>
-<pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/rekor.example.com.conf
+<pre><code class="language-bash">sudo vim /etc/letsencrypt/renewal/rekor.example.com.conf
 </code></pre>
 <pre><code class="language-bash">http01_port = 9080
 http01_address = 127.0.0.1
@@ -450,8 +459,8 @@ backend letsencrypt-backend
 EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
-<p>If so, move it into place:</p>
-<pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
+<p>If so, copy it into place:</p>
+<pre><code class="language-bash">sudo cp haproxy.cfg /etc/haproxy/
 </code></pre>
 <p>Check syntax:</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
@@ -459,13 +468,12 @@ EOF
 <h3 id="start-haproxy"><a class="header" href="#start-haproxy">Start HAProxy</a></h3>
 <p>Let's now start HAProxy:</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
-</code></pre>
-<pre><code class="language-bash">sudo systemctl restart haproxy.service
-
+sudo systemctl restart haproxy.service
 sudo systemctl status haproxy.service
+</code></pre>
+<p>Should print:</p>
+<pre><code class="language-bash">Executing: /lib/systemd/systemd-sysv-install enable haproxy
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago

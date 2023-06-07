@@ -181,7 +181,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-rekor \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.10 \
@@ -192,7 +192,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-fulcio \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.11 \
@@ -203,7 +203,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-oauth2 \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.12 \
@@ -214,7 +214,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-ctl \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.13 \

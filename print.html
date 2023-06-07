@@ -248,7 +248,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-rekor \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.10 \
@@ -259,7 +259,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-fulcio \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.11 \
@@ -270,7 +270,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-oauth2 \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.12 \
@@ -281,7 +281,7 @@ sigstore-the-hard-way-proj-allow-internal  sigstore-the-hard-way-proj  INGRESS  
 <pre><code class="language-bash">gcloud compute instances create sigstore-ctl \
     --async \
     --boot-disk-size 200GB \
-    --image-family debian-10 \
+    --image-family debian-11 \
     --image-project debian-cloud \
     --machine-type e2-small \
     --private-network-ip 10.240.0.13 \
@@ -390,7 +390,7 @@ can be used by trillian, for this example we will use mariadb.</p>
 you need to start rekor with <code>--enable_retrieve_api=false</code></p>
 </blockquote>
 <h3 id="install-latest-golang-compiler"><a class="header" href="#install-latest-golang-compiler">Install latest golang compiler</a></h3>
-<p>Download and run the golang installer (system package is not yet 1.16):</p>
+<p>Download and run the golang installer (system package are often older than what rekor requires):</p>
 <pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 </code></pre>
 <pre><code class="language-bash">chmod +x installer_linux
@@ -399,7 +399,7 @@ you need to start rekor with <code>--enable_retrieve_api=false</code></p>
 </code></pre>
 <p>e.g.</p>
 <pre><code class="language-bash">Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -413,7 +413,7 @@ new shell prompt.
 <pre><code class="language-bash">source /home/$USER/.bash_profile
 
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 </code></pre>
 <h3 id="install-rekor"><a class="header" href="#install-rekor">Install rekor</a></h3>
 <p>We will work with the rekor repo (we grab the whole repo as we will need a some scripts):</p>
@@ -424,18 +424,20 @@ go version go1.17.1 linux/amd64
 <p>And let's install both the server and the CLI:</p>
 <pre><code class="language-bash">go build -o rekor-cli ./cmd/rekor-cli
 </code></pre>
-<pre><code class="language-bash">sudo mv rekor-cli /usr/local/bin/
+<pre><code class="language-bash">sudo cp rekor-cli /usr/local/bin/
 </code></pre>
 <pre><code class="language-bash">go build -o rekor-server ./cmd/rekor-server
 </code></pre>
-<pre><code class="language-bash">sudo mv rekor-server /usr/local/bin/
+<pre><code class="language-bash">sudo cp rekor-server /usr/local/bin/
 </code></pre>
 <h3 id="database"><a class="header" href="#database">Database</a></h3>
 <p>Trillian requires a database, let's first run <code>mysql_secure_installation</code> to
 remove test accounts etc:</p>
 <pre><code class="language-bash">sudo mysql_secure_installation
-
-NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
+</code></pre>
+<p>The script is interactive. The following snippet captures the answers to
+the script's prompts:</p>
+<pre><code class="language-bash">NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
 In order to log into MariaDB to secure it, we'll need the current
@@ -502,11 +504,11 @@ Loading table data..
 <h3 id="install-trillian-components"><a class="header" href="#install-trillian-components">Install trillian components</a></h3>
 <pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 </code></pre>
 <pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 </code></pre>
 <h3 id="run-trillian"><a class="header" href="#run-trillian">Run trillian</a></h3>
 <p>The following are best run in two terminals, which are then left open (this
@@ -552,21 +554,17 @@ EOF'
 </code></pre>
 <p>Enable systemd services:</p>
 <pre><code class="language-bash">sudo systemctl daemon-reload
-</code></pre>
-<pre><code class="language-bash">sudo systemctl enable trillian_log_server.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
-
+sudo systemctl enable trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
 sudo systemctl start trillian_log_server.service
-
+sudo systemctl start trillian_log_signer.service
 sudo systemctl status trillian_log_server.service
-● trillian_log_server.service - trillian_log_server
+sudo systemctl status trillian_log_signer.service
+</code></pre>
+<p>After the systemd services have been enabled, the output from the last command should be similar to:</p>
+<pre><code class="language-bash">● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-</code></pre>
-<pre><code class="language-bash">sudo systemctl enable trillian_log_signer.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -599,6 +597,17 @@ EOF'
 sudo systemctl enable rekor.service
 sudo systemctl start rekor.service
 sudo systemctl status rekor.service
+</code></pre>
+<p>The last command should print:</p>
+<pre><code class="language-bash"> rekor.service - rekor
+     Loaded: loaded (/etc/systemd/system/rekor.service; enabled; vendor preset: enabled)
+     Active: active (running) since Mon 2023-05-08 11:09:20 UTC; 2h 0min ago
+   Main PID: 21612 (rekor-server)
+      Tasks: 8 (limit: 2353)
+     Memory: 21.8M
+        CPU: 649ms
+     CGroup: /system.slice/rekor.service
+             └─21612 /usr/local/bin/rekor-server serve --rekor_server.address=0.0.0.0 --trillian_log_server.port=8091
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config"><a class="header" href="#lets-encrypt-tls--ha-proxy-config">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
@@ -633,7 +642,7 @@ systemctl reload haproxy.service
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
 <p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):</p>
-<pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/rekor.example.com.conf
+<pre><code class="language-bash">sudo vim /etc/letsencrypt/renewal/rekor.example.com.conf
 </code></pre>
 <pre><code class="language-bash">http01_port = 9080
 http01_address = 127.0.0.1
@@ -674,8 +683,8 @@ backend letsencrypt-backend
 EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
-<p>If so, move it into place:</p>
-<pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
+<p>If so, copy it into place:</p>
+<pre><code class="language-bash">sudo cp haproxy.cfg /etc/haproxy/
 </code></pre>
 <p>Check syntax:</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
@@ -683,13 +692,12 @@ EOF
 <h3 id="start-haproxy"><a class="header" href="#start-haproxy">Start HAProxy</a></h3>
 <p>Let's now start HAProxy:</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
-</code></pre>
-<pre><code class="language-bash">sudo systemctl restart haproxy.service
-
+sudo systemctl restart haproxy.service
 sudo systemctl status haproxy.service
+</code></pre>
+<p>Should print:</p>
+<pre><code class="language-bash">Executing: /lib/systemd/systemd-sysv-install enable haproxy
+Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -737,7 +745,7 @@ certificates.</p>
 <pre><code class="language-bash">sudo apt-get install haproxy make git gcc certbot -y
 </code></pre>
 <h3 id="install-latest-golang-compiler-1"><a class="header" href="#install-latest-golang-compiler-1">Install latest golang compiler</a></h3>
-<p>Download and run the golang installer (system package is not yet 1.16)</p>
+<p>Download and run the golang installer (system package are often older than what Dex requires):</p>
 <pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 </code></pre>
 <pre><code class="language-bash">chmod +x installer_linux
@@ -746,7 +754,7 @@ certificates.</p>
 </code></pre>
 <p>e.g.</p>
 <pre><code>Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -760,12 +768,12 @@ new shell prompt.
 <pre><code class="language-bash">source /home/$USER/.bash_profile
 
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config-1"><a class="header" href="#lets-encrypt-tls--ha-proxy-config-1">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
 private <code>IP</code> address:</p>
-<pre><code class="language-bash">DOMAIN=&quot;oauth2.yourdomain.com&quot;
+<pre><code class="language-bash">DOMAIN=&quot;oauth2.example.com&quot;
 IP=&quot;10.240.0.12&quot;
 </code></pre>
 <p>Let's now run certbot to obtain our TLS certs:</p>
@@ -795,7 +803,7 @@ systemctl reload haproxy.service
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
 <p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot):</p>
-<pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/oauth2.example.com.conf
+<pre><code class="language-bash">sudo vim /etc/letsencrypt/renewal/oauth2.example.com.conf
 </code></pre>
 <pre><code class="language-bash">http01_port = 9080
 http01_address = 127.0.0.1
@@ -837,7 +845,7 @@ EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
 <p>If so, move it into place:</p>
-<pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
+<pre><code class="language-bash">sudo cp haproxy.cfg /etc/haproxy/
 </code></pre>
 <p>Check syntax:</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
@@ -845,13 +853,12 @@ EOF
 <h3 id="start-haproxy-1"><a class="header" href="#start-haproxy-1">Start HAProxy</a></h3>
 <p>Let's now start HAProxy:</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
-</code></pre>
-<pre><code class="language-bash">sudo systemctl restart haproxy.service
-
+sudo systemctl restart haproxy.service
 sudo systemctl status haproxy.service
+</code></pre>
+<p>Should print something like:</p>
+<pre><code class="language-bash">Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -876,7 +883,7 @@ git clone https://github.com/dexidp/dex.git
 </code></pre>
 <pre><code class="language-bash">cd dex
 make build
-sudo mv bin/dex /usr/local/bin/
+sudo cp bin/dex /usr/local/bin/
 </code></pre>
 <h3 id="obtain-google-oauth-credentials"><a class="header" href="#obtain-google-oauth-credentials">Obtain Google OAUTH credentials</a></h3>
 <blockquote>
@@ -979,10 +986,10 @@ connectors:
 #     redirectURI: https://${DOMAIN}/auth/callback
 EOF
 </code></pre>
-<p>Move configuration file:</p>
+<p>Copy configuration file:</p>
 <pre><code class="language-bash">sudo mkdir -p /var/dex/
 sudo mkdir -p /etc/dex/
-sudo mv dex-config.yaml /etc/dex/
+sudo cp dex-config.yaml /etc/dex/
 </code></pre>
 <h3 id="start-dex"><a class="header" href="#start-dex">Start dex</a></h3>
 <pre><code class="language-bash">dex serve --web-http-addr=0.0.0.0:6000  /etc/dex/dex-config.yaml
@@ -1036,7 +1043,7 @@ Azure Dedicated HSM.</p>
 <p>📝 If you plan to use GCP Certificate Service, you can drop SoftHSM and opensc</p>
 </blockquote>
 <h3 id="install-latest-golang-compiler-2"><a class="header" href="#install-latest-golang-compiler-2">Install latest golang compiler</a></h3>
-<p>Download and run the golang installer (system package is not yet 1.16)</p>
+<p>Download and run the golang installer (system package are often older than what Fulcio requires):</p>
 <pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 </code></pre>
 <pre><code class="language-bash">chmod +x installer_linux
@@ -1045,7 +1052,7 @@ Azure Dedicated HSM.</p>
 </code></pre>
 <p>e.g.</p>
 <pre><code>Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -1058,17 +1065,17 @@ new shell prompt.
 <p>As suggested run</p>
 <pre><code class="language-bash">source /home/$USER/.bash_profile
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 </code></pre>
 <h3 id="install-fulcio"><a class="header" href="#install-fulcio">Install Fulcio</a></h3>
-<pre><code class="language-bash">go install github.com/sigstore/fulcio@v0.5.2
+<pre><code class="language-bash">go install github.com/sigstore/fulcio@v1.3.1
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/fulcio /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/fulcio /usr/local/bin/
 </code></pre>
 <h3 id="lets-encrypt-tls--ha-proxy-config-2"><a class="header" href="#lets-encrypt-tls--ha-proxy-config-2">Let's encrypt (TLS) &amp; HA Proxy config</a></h3>
 <p>Let's create a HAProxy config, set <code>DOMAIN</code> to your registered domain and your
 private <code>IP</code> address</p>
-<pre><code class="language-bash">DOMAIN=&quot;fulcio.yourdomain.com&quot;
+<pre><code class="language-bash">DOMAIN=&quot;fulcio.example.com&quot;
 IP=&quot;10.240.0.11&quot;
 </code></pre>
 <p>Let's now run certbot to obtain our TLS certs.</p>
@@ -1098,7 +1105,7 @@ systemctl reload haproxy.service
 <pre><code class="language-bash">sudo chmod +x /etc/letsencrypt/renewal-hooks/post/haproxy-ssl-renew.sh
 </code></pre>
 <p>Replace port and address in the certbot's renewal configuration file for the domain (pass ACME request through the haproxy to certbot)</p>
-<pre><code class="language-bash">ls -l /etc/letsencrypt/renewal/fulcio.example.com.conf
+<pre><code class="language-bash">sudo vim /etc/letsencrypt/renewal/fulcio.example.com.conf
 </code></pre>
 <pre><code>http01_port = 9080
 http01_address = 127.0.0.1
@@ -1139,8 +1146,8 @@ backend letsencrypt-backend
 EOF
 </code></pre>
 <p>Inspect the resulting <code>haproxy.cfg</code> and make sure everything looks correct.</p>
-<p>If so, move it into place</p>
-<pre><code class="language-bash">sudo mv haproxy.cfg /etc/haproxy/
+<p>If so, copy it into place</p>
+<pre><code class="language-bash">sudo cp haproxy.cfg /etc/haproxy/
 </code></pre>
 <p>Check syntax</p>
 <pre><code class="language-bash">sudo /usr/sbin/haproxy -c -V -f /etc/haproxy/haproxy.cfg
@@ -1148,12 +1155,12 @@ EOF
 <h3 id="start-haproxy-2"><a class="header" href="#start-haproxy-2">Start HAProxy</a></h3>
 <p>Let's now start HAProxy</p>
 <pre><code class="language-bash">sudo systemctl enable haproxy.service
-
-Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install enable haproxy
-</code></pre>
-<pre><code class="language-bash">sudo systemctl restart haproxy.service
+sudo systemctl restart haproxy.service
 sudo systemctl status haproxy.service
+</code></pre>
+<p>The above should print:</p>
+<pre><code class="language-bash">Synchronizing state of haproxy.service with SysV service script with /lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable haproxy
 ● haproxy.service - HAProxy Load Balancer
    Loaded: loaded (/lib/systemd/system/haproxy.service; enabled; vendor preset: enabled)
    Active: active (running) since Sun 2021-07-18 10:12:28 UTC; 58min ago
@@ -1359,9 +1366,12 @@ EOF
 <pre><code class="language-bash">mv config.json $HOME/fulcio-config/
 </code></pre>
 <h1 id="start-fulcioca"><a class="header" href="#start-fulcioca">Start FulcioCA</a></h1>
-<p>We now have two methods of starting Fulcio depending on your Certificate
+<p>We now have three methods of starting Fulcio depending on your Certificate
 Authority system choice.</p>
-<p>In both cases you may create a bare minimal systemd service</p>
+<p>In each case you may create a bare minimal systemd service. Note
+that the systemd service uses <code>/etc/fulcio-config</code> as the working
+directory, being a system-wide service, while the examples earlier used
+<code>$HOME/fulcio-config</code>. Copy the <code>config.json</code> file as appropriate.</p>
 <pre><code class="language-bash">cat /etc/systemd/system/fulcio.service
 [Unit]
 Description=fulcio
@@ -1372,7 +1382,7 @@ StartLimitBurst=5
 
 [Service]
 Environment=SOFTHSM2_CONF=/etc/fulcio-config/config/softhsm2.cfg
-ExecStart=/usr/local/bin/fulcio serve --config-path=/etc/fulcio-config/config.json ...
+ExecStart=/usr/local/bin/fulcio serve ...
 WorkingDirectory=/etc/fulcio-config
 Restart=on-failure
 RestartSec=5s
@@ -1386,7 +1396,7 @@ sudo systemctl start fulcio.service
 sudo systemctl status fulcio.service
 </code></pre>
 <h2 id="file-ca"><a class="header" href="#file-ca">File CA</a></h2>
-<pre><code class="language-bash">fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=fulcio-config/fulcio-root.pem  --fileca-key=fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+<pre><code class="language-bash">fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=fileca --fileca-cert=$HOME/fulcio-config/fulcio-root.pem  --fileca-key=$HOME/fulcio-config/file_ca_key.pem --fileca-key-passwd=p6ssw0rd --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 </code></pre>
 <h2 id="softhsm"><a class="header" href="#softhsm">SoftHSM</a></h2>
 <pre><code class="language-bash">fulcio serve --config-path=$HOME/fulcio-config/config.json --ca=pkcs11ca --hsm-caroot-id=1 --pkcs11-config-path=$HOME/fulcio-config/config/crypto11.conf --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
@@ -1396,13 +1406,13 @@ sudo systemctl status fulcio.service
 set this up next.</p>
 </blockquote>
 <h2 id="google-certificate-authority-service-1"><a class="header" href="#google-certificate-authority-service-1">Google Certificate Authority Service</a></h2>
-<pre><code class="language-bash">fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
+<pre><code class="language-bash">fulcio serve --ca googleca --gcp_private_ca_parent=${resource_name} --ct-log-url=http://sigstore-ctl:6105/sigstore --host=0.0.0.0 --port=5000
 </code></pre>
 <blockquote>
 <p>📝 Your resource name is a long POSIX type path string, e.g. <code>projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx</code></p>
 </blockquote>
 <p>For example</p>
-<pre><code>fulcio serve --config-path=/etc/fulcio-config/config.json --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
+<pre><code>fulcio serve --ca googleca --gcp_private_ca_parent=projects/sigstore-the-hard-way-proj/locations/europe-west1/caPools/sigstore-the-hard-way/certificateAuthorities/xxxx --ctl-log-url=http://sigstore-ctl:6105/sigstore
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="certificate-transparency-log"><a class="header" href="#certificate-transparency-log">Certificate transparency log</a></h1>
 <p>We will now install the Certificate transparency log (CTL).</p>
@@ -1419,7 +1429,7 @@ set this up next.</p>
 <pre><code class="language-bash">sudo apt-get install mariadb-server git wget -y
 </code></pre>
 <h3 id="install-latest-golang-compiler-3"><a class="header" href="#install-latest-golang-compiler-3">Install latest golang compiler</a></h3>
-<p>Download and run the golang installer (system package is not yet 1.16)</p>
+<p>Download and run the golang installer (system package are often older than what Trillian requires):</p>
 <pre><code class="language-bash">curl -O https://storage.googleapis.com/golang/getgo/installer_linux
 </code></pre>
 <pre><code class="language-bash">chmod +x installer_linux
@@ -1428,7 +1438,7 @@ set this up next.</p>
 </code></pre>
 <p>e.g.</p>
 <pre><code class="language-bash">Welcome to the Go installer!
-Downloading Go version go1.17.1 to /home/luke/.go
+Downloading Go version go1.20.4 to /home/luke/.go
 This may take a bit of time...
 Downloaded!
 Setting up GOPATH
@@ -1441,13 +1451,15 @@ new shell prompt.
 <p>As suggested run</p>
 <pre><code class="language-bash">source /home/$USER/.bash_profile
 go version
-go version go1.17.1 linux/amd64
+go version go1.20.4 linux/amd64
 </code></pre>
 <h3 id="database-1"><a class="header" href="#database-1">Database</a></h3>
-<p>Trillian requires a databbase, let's first run <code>mysql_secure_installation</code></p>
+<p>Trillian requires a database, let's first run <code>mysql_secure_installation</code></p>
 <pre><code class="language-bash">sudo mysql_secure_installation
-
-NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
+</code></pre>
+<p>The script is interactive. The following snippet captures the answers to
+the script's prompts:</p>
+<pre><code class="language-bash">NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB
       SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!
 
 In order to log into MariaDB to secure it, we'll need the current
@@ -1517,17 +1529,17 @@ Creating test database and test user account
 Loading table data..
 </code></pre>
 <h3 id="install-trillian-components-1"><a class="header" href="#install-trillian-components-1">Install trillian components</a></h3>
-<pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_server@v1.3.14-0.20210713114448-df474653733c
+<pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_server@v1.5.1
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/trillian_log_server /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/trillian_log_server /usr/local/bin/
 </code></pre>
-<pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_signer@v1.3.14-0.20210713114448-df474653733c
+<pre><code class="language-bash">go install github.com/google/trillian/cmd/trillian_log_signer@v1.5.1
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/trillian_log_signer /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/trillian_log_signer /usr/local/bin/
 </code></pre>
-<pre><code class="language-bash">go install github.com/google/trillian/cmd/createtree@v1.3.14-0.20210713114448-df474653733c
+<pre><code class="language-bash">go install github.com/google/trillian/cmd/createtree@v1.5.1
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/createtree /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/createtree /usr/local/bin/
 </code></pre>
 <h3 id="run-trillian-1"><a class="header" href="#run-trillian-1">Run trillian</a></h3>
 <p>The following is best run in two terminals which are then left open (this helps for debugging)</p>
@@ -1536,7 +1548,7 @@ Loading table data..
 <pre><code class="language-bash">trillian_log_signer --logtostderr --force_master --http_endpoint=localhost:8190 -rpc_endpoint=localhost:8191  --batch_size=1000 --sequencer_guard_window=0 --sequencer_interval=200ms
 </code></pre>
 <p>Alternatively, create bare minimal systemd services</p>
-<pre><code class="language-bash">cat /etc/systemd/system/trillian_log_server.service
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/trillian_log_server.service
 [Unit]
 Description=trillian_log_server
 After=network-online.target
@@ -1551,8 +1563,9 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
-<pre><code class="language-bash">cat /etc/systemd/system/trillian_log_signer.service
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/trillian_log_signer.service
 [Unit]
 Description=trillian_log_signer
 After=network-online.target
@@ -1567,22 +1580,22 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
 <p>Enable systemd services</p>
 <pre><code class="language-bash">sudo systemctl daemon-reload
-</code></pre>
-<pre><code class="language-bash">sudo systemctl enable trillian_log_server.service
-Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
+sudo systemctl enable trillian_log_server.service
 sudo systemctl start trillian_log_server.service
 sudo systemctl status trillian_log_server.service
+sudo systemctl enable trillian_log_signer.service
+sudo systemctl start trillian_log_signer.service
+sudo systemctl status trillian_log_signer.service
+</code></pre>
+<pre><code class="language-bash">Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_server.service → /etc/systemd/system/trillian_log_server.service.
 ● trillian_log_server.service - trillian_log_server
    Loaded: loaded (/etc/systemd/system/trillian_log_server.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:41:49 UTC; 8s ago
-</code></pre>
-<pre><code class="language-bash">sudo systemctl enable trillian_log_signer.service
 Created symlink /etc/systemd/system/multi-user.target.wants/trillian_log_signer.service → /etc/systemd/system/trillian_log_signer.service.
-sudo systemctl start trillian_log_signer.service
-sudo systemctl status trillian_log_signer.service
 ● trillian_log_signer.service - trillian_log_signer
    Loaded: loaded (/etc/systemd/system/trillian_log_signer.service; enabled; vendor preset: enabled)
    Active: active (running) since Thu 2021-09-30 17:42:05 UTC; 12s ago
@@ -1590,7 +1603,7 @@ sudo systemctl status trillian_log_signer.service
 <h3 id="install-ctfe-server"><a class="header" href="#install-ctfe-server">Install CTFE server</a></h3>
 <pre><code class="language-bash">go install github.com/google/certificate-transparency-go/trillian/ctfe/ct_server@latest
 </code></pre>
-<pre><code class="language-bash">sudo mv ~/go/bin/ct_server /usr/local/bin/
+<pre><code class="language-bash">sudo cp ~/go/bin/ct_server /usr/local/bin/
 </code></pre>
 <h3 id="create-a-private-key"><a class="header" href="#create-a-private-key">Create a private key</a></h3>
 <blockquote>
@@ -1645,9 +1658,9 @@ when generating the private key.</p>
 <code>fulcio-root.pem</code> is the root ID certificate, we created in <a href="06-fulcio.html">06-fulcio</a>.</p>
 </blockquote>
 <pre><code class="language-bash">sudo mkdir -p /etc/ctfe-config/
-sudo mv ct.cfg /etc/ctfe-config/
-sudo mv fulcio-root.pem /etc/ctfe-config/
-sudo mv privkey.pem /etc/ctfe-config/
+sudo cp ct.cfg /etc/ctfe-config/
+sudo cp fulcio-root.pem /etc/ctfe-config/
+sudo cp privkey.pem /etc/ctfe-config/
 </code></pre>
 <h3 id="start-the-ct-log"><a class="header" href="#start-the-ct-log">Start the CT log</a></h3>
 <pre><code class="language-bash">ct_server -logtostderr -log_config /etc/ctfe-config/ct.cfg -log_rpc_server localhost:8091 -http_endpoint 0.0.0.0:6105
@@ -1657,7 +1670,7 @@ sudo mv privkey.pem /etc/ctfe-config/
 (for this tutorial at least)</p>
 </blockquote>
 <p>You may create a bare minimal systemd service</p>
-<pre><code class="language-bash">cat /etc/systemd/system/ct_server.service
+<pre><code class="language-bash">sudo bash -c 'cat &lt;&lt; EOF &gt; /etc/systemd/system/ct_server.service
 [Unit]
 Description=ct_server
 After=network-online.target
@@ -1672,6 +1685,7 @@ RestartSec=5s
 
 [Install]
 WantedBy=multi-user.target
+EOF'
 </code></pre>
 <pre><code class="language-bash">sudo systemctl daemon-reload
 sudo systemctl enable ct_server.service
@@ -1737,7 +1751,7 @@ Verified OK
 </code></pre>
 <p>Install cosign:</p>
 <pre><code class="language-bash">chmod +x cosign-linux-amd64
-sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+sudo cp cosign-linux-amd64 /usr/local/bin/cosign
 </code></pre>
 <h3 id="macos-binary"><a class="header" href="#macos-binary">MacOS binary</a></h3>
 <p>Download required files:</p>
@@ -1752,7 +1766,7 @@ Verified OK
 </code></pre>
 <p>Install cosign:</p>
 <pre><code class="language-bash">chmod +x cosign-darwin-amd64
-sudo mv cosign-darwin-amd64 /usr/local/bin/cosign
+sudo cp cosign-darwin-amd64 /usr/local/bin/cosign
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="sign-container"><a class="header" href="#sign-container">Sign Container</a></h1>
 <p>We are now ready to sign our container using our own sigstore infrastructure</p>
