@@ -1,10 +1,9 @@
 # sigstore the hardway
 
-![Publish Status](https://github.com/lukehinds/sigstore-the-hard-way/workflows/publish/badge.svg)
+![Publish Status](https://github.com/stacklok/sigstore-the-hard-way/workflows/publish/badge.svg)
 
-sigstore the hard way is hosted at <https://sthw.decodebytes.sh> and is available for free.
+sigstore the hard way is hosted at <https://stacklok.github.io/sigstore-the-hard-way/> and is available for free.
 
-If the above URL does not work, you can also see the site [here](https://lukehinds.github.io/sigstore-the-hard-way/)
 
 ## contributing
 
