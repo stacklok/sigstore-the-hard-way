@@ -1,34 +1,39 @@
-# sigstore the hardway
+# Sigstore the hardway
 
 ![Publish Status](https://github.com/stacklok/sigstore-the-hard-way/workflows/publish/badge.svg)
 
-sigstore the hard way is hosted at <https://stacklok.github.io/sigstore-the-hard-way/> and is available for free.
+**Sigstore the hard way** is a document that explains the inner workings of Sigstore's infrastructure. It's hosted at <https://stacklok.github.io/sigstore-the-hard-way/> and is available for free.
 
+This README will guide you through the process of setting up and running "Sigstore the hard way" locally and how to contribute to the project.
 
-## contributing
+## Contributing
 
-Should you wish to contribute, you're in the right place.
+Thank you for considering contributing! If this is the first time contributing to an Open Source project, you can learn how to make your first pull request from this free video series:
 
-Building the sigstore the hard way requires [mdBook].
+[How to Contribute to an Open Source Project on GitHub](https://egghead.io/courses/how-to-contribute-to-an-open-source-project-on-github)
 
-[mdBook]: https://github.com/rust-lang-nursery/mdBook
+### Contribution Prerequisites
 
-```bash
-cargo install mdbook
-```
+Before running Sigstore the hard way, ensure that you have the following tools installed:
 
-Once installed you can use the `mdbook` command to view in realtime the sigstore-the-hardway documentation.
+1. Install [Rust](https://www.rust-lang.org/tools/install) that includes `cargo`
+1. Run `cargo install mdbook` to install [mdBook](https://github.com/rust-lang-nursery/mdBook)
+
+If you are using a mac, we highly recommend using [Homebrew](https://brew.sh/) to install these tools.
+
+#### Run locally
+
+Once installed, [clone this reporsitory](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) and in the root folder you can use the `mdbook` command to view in realtime the sigstore-the-hardway documentation.
 
 ```bash
 mdbook serve --open
 ```
 
-You do not need to build before making a pull request, we have a CI action that will automatically
-build the site and push it to the live site.
+#### Building for production
 
-Before you push, please test:
+You do not need to build before making a pull request, we have a CI action that will automatically build the site and push it to the live site.
 
-To run the tests:
+Before you push, please run the tests:
 
 ```bash
 mdbook test
